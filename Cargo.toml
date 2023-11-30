@@ -1,0 +1,16 @@
+[package]
+name = "bingrep"
+version = "0.1.0"
+edition = "2021"
+authors = ["Dan Ilan <15796788+jmpfar@users.noreply.github.com>"]
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
+thiserror = "1.0.50"
+
+[[bin]]
+name = "bingrep"
+path = "main.rs"
