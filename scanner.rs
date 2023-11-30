@@ -4,7 +4,7 @@ use std::{error::Error, fs::File};
 use crate::filebuffer::FileBuffer;
 use crate::hex;
 
-pub(crate) struct DoubleGrepper<'a> {
+pub(crate) struct Scanner<'a> {
     file_path: String,
     minimum: Option<f64>,
     maximum: Option<f64>,
@@ -13,7 +13,7 @@ pub(crate) struct DoubleGrepper<'a> {
     filebuffer: FileBuffer<'a>,
 }
 
-impl<'a> DoubleGrepper<'a> {
+impl<'a> Scanner<'a> {
     pub fn new(file_path: String, minimum: f64, maximum: f64, show_floats: bool) -> Self {
         let file = File::open(file_path.as_str()).expect("Expect file to be opened");
 
@@ -111,13 +111,13 @@ impl<'a> DoubleGrepper<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::DoubleGrepper;
+    use super::Scanner;
     use crate::filebuffer::FileBuffer;
 
     #[test]
     fn scan_buffer() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-        let mut double_grepper = DoubleGrepper {
+        let mut double_grepper = Scanner {
             file_path: "ok".into(),
             show_floats: false,
             minimum: f64::MIN.into(),

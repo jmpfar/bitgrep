@@ -1,7 +1,7 @@
 use clap::Parser;
-use grepper::DoubleGrepper;
+use scanner::Scanner;
 mod filebuffer;
-mod grepper;
+mod scanner;
 mod hex;
 
 /// Forensics grep.
@@ -27,6 +27,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let mut grepper: DoubleGrepper = DoubleGrepper::new(args.file, args.min, args.max, args.float);
+    let mut grepper: Scanner = Scanner::new(args.file, args.min, args.max, args.float);
     let _ = grepper.scan();
 }
