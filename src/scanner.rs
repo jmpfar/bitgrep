@@ -1,5 +1,6 @@
 use std::{error::Error, fs::File};
 
+use crate::common::Endianness;
 use crate::filebuffer::FileBuffer;
 use crate::filters::and::And;
 use crate::filters::filter::Filter;
@@ -7,9 +8,9 @@ use crate::filters::max::Max;
 use crate::filters::min::Min;
 use crate::hex;
 use crate::workers::native_processor::NativeProcessor;
-use crate::workers::processors::{Endianness, Processor};
+use crate::workers::processors::Processor;
 
-pub(crate) struct Scanner<'a> {
+pub struct Scanner<'a> {
     file_path: String,
     filebuffer: FileBuffer<'a>,
     filter: Box<dyn Filter<f64>>,
@@ -82,7 +83,6 @@ impl<'a> Scanner<'a> {
                 );
             }
 
-
             // move carret to the next byte
             self.filebuffer.pop_drop(1)?;
         }
@@ -95,9 +95,8 @@ impl<'a> Scanner<'a> {
 mod tests {
     use super::Scanner;
     use crate::{
-        filebuffer::FileBuffer,
-        filters::and::And,
-        workers::{native_processor::NativeProcessor, processors::Endianness},
+        common::Endianness, filebuffer::FileBuffer, filters::and::And,
+        workers::native_processor::NativeProcessor,
     };
 
     #[test]

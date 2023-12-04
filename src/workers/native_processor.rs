@@ -1,5 +1,6 @@
-use super::convertors::{FromLittleEndian, FromBigEndian};
-use super::processors::{Endianness, Processor};
+use super::convertors::{FromBigEndian, FromLittleEndian};
+use super::processors::Processor;
+use crate::common::Endianness;
 use std::marker::PhantomData;
 use std::mem;
 
@@ -11,7 +12,7 @@ pub(crate) struct NativeProcessor<T> {
 impl<T> Processor<T> for NativeProcessor<T>
 where
     T: FromLittleEndian<Output = T>,
-    T: FromBigEndian<Output = T>
+    T: FromBigEndian<Output = T>,
 {
     fn consume(&self, bytes: &Vec<u8>) -> Option<T> {
         if bytes.len() < self.chunk_size() {
@@ -21,7 +22,7 @@ where
 
         if self.endianness == Endianness::Big {
             let result = <T as FromBigEndian>::from_bytes(&bytes);
-            return Some(result);            
+            return Some(result);
         }
 
         let result = <T as FromLittleEndian>::from_bytes(&bytes);
@@ -47,7 +48,7 @@ impl<T> NativeProcessor<T> {
             endianness: endianness,
             phantom: PhantomData,
         };
-    }    
+    }
 }
 
 #[cfg(test)]

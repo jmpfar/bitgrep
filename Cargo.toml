@@ -11,6 +11,18 @@ license = "Apache-2.0"
 clap = { version = "4.4.8", features = ["derive"] }
 thiserror = "1.0.50"
 
+[lib]
+name = "bingrep"
+path = "src/lib.rs"
+
 [[bin]]
 name = "bingrep"
-path = "main.rs"
+path = "src/bin/main.rs"
+
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "scanner_bench"
+harness = false

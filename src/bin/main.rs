@@ -1,11 +1,6 @@
 use clap::Parser;
-use scanner::Scanner;
-use workers::processors::Endianness;
-mod filebuffer;
-mod scanner;
-mod hex;
-mod workers;
-mod filters;
+use bingrep::scanner::Scanner;
+use bingrep::common::Endianness;
 
 /// Forensics grep.
 #[derive(Parser, Debug)]
