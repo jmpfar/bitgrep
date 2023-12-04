@@ -52,16 +52,16 @@ impl<'a> FileBuffer<'a> {
     /// Peeks ahead into the buffer without changing the current location
     /// If exceeds current buffer it fetches more from the file.
     /// If in EOF and there's no more data, the method will return available data
-    pub fn peek(&mut self, n: usize) -> Result<Vec<u8>, io::Error> {
+    pub fn peek(&mut self, n: usize) -> Result<&[u8], io::Error> {
         if self.reached_eof {
             let data = self.ring_buf.as_slices().0;
             let size = cmp::min(n, self.ring_buf.len());
-            return Ok(data[..size].to_vec());
+            return Ok(&data[..size]);
         }
 
         if n <= self.ring_buf.len() {
             let data = self.ring_buf.as_slices().0;
-            return Ok(data[..n].to_vec());
+            return Ok(&data[..n]);
         }
 
         self.fill_buffer()?;
@@ -125,7 +125,7 @@ mod tests {
 
         let result = buffer.peek(4).expect("peek to succeed");
 
-        assert_eq!([1u8, 2u8, 3u8, 4u8], result.as_slice());
+        assert_eq!([1u8, 2u8, 3u8, 4u8], result);
     }
 
     #[test]
@@ -136,7 +136,7 @@ mod tests {
 
         let result = buffer.peek(5).expect("peek to succeed");
 
-        assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8], result.as_slice());
+        assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8], result);
     }
 
     #[test]
@@ -149,7 +149,7 @@ mod tests {
 
         assert_eq!(
             [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8],
-            result.as_slice()
+            result
         );
     }
 
@@ -163,7 +163,7 @@ mod tests {
 
         assert_eq!(
             [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8],
-            result.as_slice()
+            result
         );
     }
 
@@ -172,8 +172,8 @@ mod tests {
         let file = [].as_slice();
         let mut buffer = FileBuffer::new(file.clone());
 
-        let result = buffer.peek(12).expect("peek to succeed");
-        let result2 = buffer.peek(4).expect("peek to succeed");
+        let result = buffer.peek(12).expect("peek to succeed").to_owned();
+        let result2 = buffer.peek(4).expect("peek to succeed").to_owned();
 
         assert!(result.is_empty());
         assert!(result2.is_empty());
@@ -303,7 +303,7 @@ mod tests {
 
         assert_eq!(buffer.position(), 4);
         assert_eq!(
-            buffer.peek(4).expect("peek should succeed").as_slice(),
+            buffer.peek(4).expect("peek should succeed"),
             [5u8, 6u8, 7u8, 8u8]
         );
     }
@@ -318,7 +318,7 @@ mod tests {
 
         assert_eq!(buffer.position(), 5);
         assert_eq!(
-            buffer.peek(4).expect("peek should succeed").as_slice(),
+            buffer.peek(4).expect("peek should succeed"),
             [6u8, 7u8, 8u8, 9u8]
         );
     }
@@ -368,7 +368,7 @@ mod tests {
 
         assert_eq!(buffer.position(), 0);
         assert_eq!(
-            buffer.peek(4).expect("peek should succeed").as_slice(),
+            buffer.peek(4).expect("peek should succeed"),
             [1u8, 2u8, 3u8, 4u8]
         )
     }

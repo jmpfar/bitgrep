@@ -14,18 +14,18 @@ where
     T: FromLittleEndian<Output = T>,
     T: FromBigEndian<Output = T>,
 {
-    fn consume(&self, bytes: &Vec<u8>) -> Option<T> {
+    fn consume(&self, bytes: &[u8]) -> Option<T> {
         if bytes.len() < self.chunk_size() {
             // Not enough bytes supplied
             return None;
         }
 
         if self.endianness == Endianness::Big {
-            let result = <T as FromBigEndian>::from_bytes(&bytes);
+            let result = <T as FromBigEndian>::from_bytes(bytes);
             return Some(result);
         }
 
-        let result = <T as FromLittleEndian>::from_bytes(&bytes);
+        let result = <T as FromLittleEndian>::from_bytes(bytes);
         return Some(result);
     }
 

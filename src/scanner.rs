@@ -64,17 +64,17 @@ impl<'a> Scanner<'a> {
     fn scan_buffer(&mut self) -> Result<usize, Box<dyn Error>> {
         let chunk_size = self.processor.chunk_size();
         loop {
+            let cur_pos = self.filebuffer.position();
             let data = self.filebuffer.peek(chunk_size)?;
 
             // TODO: Change to vector
-            let result = self.processor.consume(&data);
+            let result = self.processor.consume(data);
 
             if result.is_none() {
                 break; // EOF
             }
 
             if self.filter.include_unwrap(result) {
-                let cur_pos = self.filebuffer.position();
                 println!(
                     "{}: [{cur_pos:#01X}] double: {} [{}]",
                     self.file_path,
