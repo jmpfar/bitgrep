@@ -1,8 +1,11 @@
 use clap::Parser;
 use scanner::Scanner;
+use workers::processors::Endianness;
 mod filebuffer;
 mod scanner;
 mod hex;
+mod workers;
+mod filters;
 
 /// Forensics grep.
 #[derive(Parser, Debug)]
@@ -14,19 +17,19 @@ struct Args {
 
     /// Minimum value to match
     #[arg(long, short = 'm', allow_hyphen_values = true)]
-    min: f64,
+    min: Option<f64>,
 
     /// Maximum value to match
     #[arg(long, short = 'M', allow_hyphen_values = true)]
-    max: f64,
+    max: Option<f64>,
 
-    #[arg(long, action)]
-    float: bool,
+    #[clap(value_enum, long = "endian", short = 'e')]
+    endianess: Endianness,
 }
 
 fn main() {
     let args = Args::parse();
 
-    let mut grepper: Scanner = Scanner::new(args.file, args.min, args.max, args.float);
+    let mut grepper: Scanner = Scanner::new(args.file, args.min, args.max, args.endianess);
     let _ = grepper.scan();
 }
