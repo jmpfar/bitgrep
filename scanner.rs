@@ -84,7 +84,7 @@ impl<'a> Scanner<'a> {
 
 
             // move carret to the next byte
-            let _ = self.filebuffer.pop(1);
+            self.filebuffer.pop_drop(1)?;
         }
 
         Ok(self.filebuffer.position())

@@ -1,5 +1,6 @@
 use std::cmp;
-use std::collections::VecDeque;
+use std::collections::{VecDeque, vec_deque};
+use std::error::Error;
 use std::io::{Read, self};
 
 
@@ -66,13 +67,13 @@ impl<'a> FileBuffer<'a> {
         return self.peek(n);
     }
 
-    fn drain(&mut self, size: usize) -> Vec<u8> {
-        let result = self.ring_buf.drain(..size).collect();
+    fn drain(&mut self, size: usize) -> vec_deque::Drain<'_, u8> {
+        let result = self.ring_buf.drain(..size);
         self.position += size;
         return result
     }
 
-    pub fn pop(&mut self, n: usize) -> Result<Vec<u8>, io::Error> {
+    fn pop_internal(&mut self, n: usize) -> Result<vec_deque::Drain<'_, u8>, std::io::Error> {
         if self.reached_eof {
             let size = cmp::min(n, self.ring_buf.len());
             let result = self.drain(size);
@@ -87,9 +88,23 @@ impl<'a> FileBuffer<'a> {
         self.fill_buffer()?;
         
         // Try again with filled buffer
-        return self.pop(n);
+        return self.pop_internal(n);        
     }
 
+    /// pop n elements from the buffer and return them in a vector
+    pub fn pop(&mut self, n: usize) -> Result<Vec<u8>, io::Error> {
+        let result =  self.pop_internal(n)?;
+        return Ok(result.collect());
+    }
+
+    /// pop n elements from the buffer, making sure nothing is copied
+    pub fn pop_drop(&mut self, n: usize) -> Result<(), io::Error> {
+        let result = self.pop_internal(n)?;
+        drop(result);
+        return Ok(());
+    }
+
+    /// absolute position in file buffer (and in file)
     pub fn position(&self) -> usize {
         return self.position;
     }
@@ -104,9 +119,8 @@ mod tests {
     fn peek_simple() {
         let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.peek(4).expect("peek to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8], result.as_slice());  
@@ -116,9 +130,8 @@ mod tests {
     fn peek_exceeds_buffer() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.peek(5).expect("peek to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8], result.as_slice());  
@@ -128,9 +141,8 @@ mod tests {
     fn peek_eof_exact() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 5;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.peek(10).expect("peek to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result.as_slice());  
@@ -140,9 +152,8 @@ mod tests {
     fn peek_eof_exceeds() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.peek(12).expect("peek to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result.as_slice());  
@@ -152,8 +163,8 @@ mod tests {
     #[test]
     fn peek_eof_multiple() {
         let file = [].as_slice();
-
         let mut buffer = FileBuffer::new(file.clone());
+
         let result = buffer.peek(12).expect("peek to succeed");
         let result2 = buffer.peek(4).expect("peek to succeed");
 
@@ -161,14 +172,24 @@ mod tests {
         assert!(result2.is_empty());
     }    
 
+    #[test]
+    fn peek_zero() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 4;
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
+        let result = buffer.peek(0).expect("peek to succeed");
+
+        assert!(result.is_empty());
+    }    
+
 
     #[test]
     fn pop_simple() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.pop(4).expect("pop to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8], result.as_slice());
@@ -178,9 +199,8 @@ mod tests {
     fn pop_exceeds_buffer() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.pop(5).expect("pop to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8], result.as_slice());  
@@ -190,9 +210,8 @@ mod tests {
     fn pop_eof_exact() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 5;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.pop(10).expect("pop to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result.as_slice());  
@@ -202,8 +221,8 @@ mod tests {
     fn pop_eof_exceeds() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.pop(12).expect("pop to succeed");
 
         assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result.as_slice());  
@@ -212,8 +231,8 @@ mod tests {
    #[test]
     fn pop_eof_multiple() {
         let file = [].as_slice();
-
         let mut buffer = FileBuffer::new(file.clone());
+
         let result = buffer.pop(12).expect("pop to succeed");
         let result2 = buffer.pop(4).expect("pop to succeed");
 
@@ -225,20 +244,9 @@ mod tests {
     fn pop_zero() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         let result = buffer.pop(0).expect("pop to succeed");
-
-        assert!(result.is_empty());
-    }
-
-    #[test]
-    fn peek_zero() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
-        const BUFFER_SIZE : usize = 4;
-
-        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
-        let result = buffer.peek(0).expect("peek to succeed");
 
         assert!(result.is_empty());
     }
@@ -246,7 +254,6 @@ mod tests {
     #[test]
     fn position_start() {
         let file = [].as_slice();
-
         let buffer = FileBuffer::new(file.clone());
 
         assert_eq!(buffer.position(), 0);
@@ -256,9 +263,8 @@ mod tests {
     fn position_middle() {
         let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         buffer.pop(3).expect("pop to succeed");
 
         assert_eq!(buffer.position(), 3);
@@ -268,12 +274,82 @@ mod tests {
     fn position_eof() {
         let file = [1u8, 2u8, 3u8, 4u8, 5u8].as_slice();
         const BUFFER_SIZE : usize = 4;
-
-
         let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
         buffer.pop(5).expect("pop to succeed");
 
         assert_eq!(buffer.position(), 5);
     }    
+
+    #[test]
+    fn pop_drop_simple() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 4;
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+        
+        buffer.pop_drop(4).expect("pop_drop to succeed");
+
+        assert_eq!(buffer.position(), 4);
+        assert_eq!(buffer.peek(4).expect("peek should succeed").as_slice(), [5u8, 6u8, 7u8, 8u8]);
+    }
+
+    #[test]
+    fn pop_drop_exceeds_buffer() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 4;
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
+        buffer.pop_drop(5).expect("pop_drop to succeed");
+
+        assert_eq!(buffer.position(), 5);
+        assert_eq!(buffer.peek(4).expect("peek should succeed").as_slice(), [6u8, 7u8, 8u8, 9u8]);
+    }
+
+    #[test]
+    fn pop_drop_eof_exact() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 5;
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
+        buffer.pop_drop(10).expect("pop_drop to succeed");
+
+        assert_eq!(buffer.position(), 10);
+    }
+
+    #[test]
+    fn pop_drop_eof_exceeds() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 4;
+
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+        buffer.pop_drop(12).expect("pop_drop should succeed");
+
+        assert!(buffer.peek(2).expect("peek should succeed").is_empty());
+        assert_eq!(buffer.position(), 10);
+    }
+ 
+   #[test]
+    fn pop_drop_eof_multiple() {
+        let file = [].as_slice();
+        let mut buffer = FileBuffer::new(file.clone());
+
+        buffer.pop_drop(12).expect("pop_drop should succeed");
+        buffer.pop_drop(4).expect("pop_drop should succeed");
+
+        assert_eq!(buffer.position(), 0);
+        assert!(buffer.peek(2).expect("peek should succeed").is_empty());
+    }    
+
+    #[test]
+    fn pop_drop_zero() {
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        const BUFFER_SIZE : usize = 4;
+        let mut buffer = FileBuffer::with_buffer_size(file.clone(), BUFFER_SIZE);
+
+        buffer.pop_drop(0).expect("pop_drop to succeed");
+
+        assert_eq!(buffer.position(), 0);
+        assert_eq!(buffer.peek(4).expect("peek should succeed").as_slice(), [1u8, 2u8, 3u8, 4u8])
+    }
 
 }
