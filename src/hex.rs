@@ -32,7 +32,7 @@ pub fn decode(s: &str) -> Result<Vec<u8>, DecodeHexError> {
 pub fn encode(bytes: Vec<u8>) -> String {
     let mut result = String::new();
     for byte in bytes {
-        write!(&mut result, "{byte:x}").expect("Failed writing to perfectly good string");
+        write!(&mut result, "{byte:x}").expect("should write to string");
     }
 
     return result;
@@ -41,7 +41,7 @@ pub fn encode(bytes: Vec<u8>) -> String {
 pub fn encode_borrowed(bytes: &[u8]) -> String {
     let mut result = String::new();
     for byte in bytes {
-        write!(&mut result, "{byte:x}").expect("Failed writing to perfectly good string");
+        write!(&mut result, "{byte:x}").expect("should write to string");
     }
 
     return result;

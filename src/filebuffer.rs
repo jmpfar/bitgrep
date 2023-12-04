@@ -119,8 +119,8 @@ mod tests {
 
     #[test]
     fn peek_simple() {
-        let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.peek(4).expect("peek to succeed");
@@ -130,8 +130,8 @@ mod tests {
 
     #[test]
     fn peek_exceeds_buffer() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.peek(5).expect("peek to succeed");
@@ -141,8 +141,8 @@ mod tests {
 
     #[test]
     fn peek_eof_exact() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 5;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.peek(10).expect("peek to succeed");
@@ -152,9 +152,9 @@ mod tests {
 
     #[test]
     fn peek_eof_exceeds() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
-        let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
+        let mut buffer: FileBuffer<'_> = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.peek(12).expect("peek to succeed");
 
@@ -175,8 +175,8 @@ mod tests {
 
     #[test]
     fn peek_zero() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.peek(0).expect("peek to succeed");
@@ -186,8 +186,8 @@ mod tests {
 
     #[test]
     fn pop_simple() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.pop(4).expect("pop to succeed");
@@ -197,8 +197,8 @@ mod tests {
 
     #[test]
     fn pop_exceeds_buffer() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.pop(5).expect("pop to succeed");
@@ -208,8 +208,8 @@ mod tests {
 
     #[test]
     fn pop_eof_exact() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 5;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.pop(10).expect("pop to succeed");
@@ -222,8 +222,8 @@ mod tests {
 
     #[test]
     fn pop_eof_exceeds() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.pop(12).expect("pop to succeed");
@@ -248,8 +248,8 @@ mod tests {
 
     #[test]
     fn pop_zero() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         let result = buffer.pop(0).expect("pop to succeed");
@@ -267,8 +267,8 @@ mod tests {
 
     #[test]
     fn position_middle() {
-        let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop(3).expect("pop to succeed");
@@ -278,8 +278,8 @@ mod tests {
 
     #[test]
     fn position_eof() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop(5).expect("pop to succeed");
@@ -289,8 +289,8 @@ mod tests {
 
     #[test]
     fn pop_drop_simple() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop_drop(4).expect("pop_drop to succeed");
@@ -304,8 +304,8 @@ mod tests {
 
     #[test]
     fn pop_drop_exceeds_buffer() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop_drop(5).expect("pop_drop to succeed");
@@ -319,8 +319,8 @@ mod tests {
 
     #[test]
     fn pop_drop_eof_exact() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 5;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop_drop(10).expect("pop_drop to succeed");
@@ -330,8 +330,8 @@ mod tests {
 
     #[test]
     fn pop_drop_eof_exceeds() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
 
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
         buffer.pop_drop(12).expect("pop_drop should succeed");
@@ -354,8 +354,8 @@ mod tests {
 
     #[test]
     fn pop_drop_zero() {
-        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         const BUFFER_SIZE: usize = 4;
+        let file = [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8].as_slice();
         let mut buffer = FileBuffer::with_buffer_size(file, BUFFER_SIZE);
 
         buffer.pop_drop(0).expect("pop_drop to succeed");
@@ -364,6 +364,6 @@ mod tests {
         assert_eq!(
             buffer.peek(4).expect("peek should succeed"),
             [1u8, 2u8, 3u8, 4u8]
-        )
+        );
     }
 }

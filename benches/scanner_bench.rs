@@ -18,7 +18,7 @@ fn scanner_random_8k_benchmark(c: &mut Criterion) {
     );
 
     c.bench_function(format!("scanner.scan() 8k random file [{FILE_NAME}]").as_str(), |b| {
-        b.iter(|| scanner.scan().expect("should complete successfuly"))
+        b.iter(|| scanner.scan().expect("should complete successfuly"));
     });
 }
 
