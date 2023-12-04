@@ -25,7 +25,7 @@ impl<T> And<T> {
     }
 
     pub fn with_filters(filters: Vec<BoxedFilter<T>>) -> And<T> {
-        return And { filters: filters };
+        return And { filters };
     }
 
     pub fn add(&mut self, filter: Box<dyn Filter<T>>) {
@@ -50,22 +50,22 @@ mod tests {
     fn and_true_false_returns_false() {
         let and = And::with_filters(vec![Box::new(EqualFilter(2)), Box::new(EqualFilter(3))]);
 
-        assert_eq!(false, and.include(2));
-        assert_eq!(false, and.include(3));
+        assert!(!and.include(2));
+        assert!(!and.include(3));
     }
 
     #[test]
     fn and_true_true_returns_true() {
         let and = And::with_filters(vec![Box::new(EqualFilter(3)), Box::new(EqualFilter(3))]);
 
-        assert_eq!(true, and.include(3));
+        assert!(and.include(3));
     }
 
     #[test]
     fn and_false_false_returns_false() {
         let and = And::with_filters(vec![Box::new(EqualFilter(2)), Box::new(EqualFilter(1))]);
 
-        assert_eq!(false, and.include(3));
+        assert!(!and.include(3));
     }
 
     #[test]
@@ -75,7 +75,7 @@ mod tests {
         and.add(Box::new(EqualFilter(2)));
         and.add(Box::new(EqualFilter(2)));
 
-        assert_eq!(false, and.include(3));
-        assert_eq!(true, and.include(2));
+        assert!(!and.include(3));
+        assert!(and.include(2));
     }
 }

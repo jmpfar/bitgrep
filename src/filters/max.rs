@@ -14,7 +14,7 @@ impl<T: std::cmp::PartialOrd> Filter<T> for Max<T> {
 
 impl<T> Max<T> {
     pub fn new(max: T) -> Max<T> {
-        return Max { max: max };
+        return Max { max };
     }
 
     pub fn with_box(max: T) -> Box<Max<T>> {
@@ -28,22 +28,22 @@ mod tests {
 
     #[test]
     fn max_greater_returns_false() {
-        assert_eq!(true, Max::new(32.445).include(32.0));
-        assert_eq!(true, Max::new(32).include(31));
-        assert_eq!(true, Max::new(40u8).include(0));
+        assert!(Max::new(32.445).include(32.0));
+        assert!(Max::new(32).include(31));
+        assert!(Max::new(40u8).include(0));
     }
 
     #[test]
     fn max_equal_returns_true() {
-        assert_eq!(true, Max::new(32.445).include(32.445));
-        assert_eq!(true, Max::new(31).include(31));
-        assert_eq!(true, Max::new(40u8).include(40u8));
+        assert!(Max::new(32.445).include(32.445));
+        assert!(Max::new(31).include(31));
+        assert!(Max::new(40u8).include(40u8));
     }
 
     #[test]
     fn max_smaller_returns_false() {
-        assert_eq!(false, Max::new(30.445).include(32.0));
-        assert_eq!(false, Max::new(30).include(31));
-        assert_eq!(false, Max::new(40u8).include(44));
+        assert!(!Max::new(30.445).include(32.0));
+        assert!(!Max::new(30).include(31));
+        assert!(!Max::new(40u8).include(44));
     }
 }

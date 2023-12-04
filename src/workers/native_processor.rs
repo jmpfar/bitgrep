@@ -36,18 +36,18 @@ where
 
 impl<T> NativeProcessor<T> {
     pub fn with_little_endian() -> NativeProcessor<T> {
-        return Self::new(Endianness::Little);
+        Self::new(Endianness::Little)
     }
 
     pub fn with_big_endian() -> NativeProcessor<T> {
-        return Self::new(Endianness::Big);
+        Self::new(Endianness::Big)
     }
 
     pub fn new(endianness: Endianness) -> NativeProcessor<T> {
-        return NativeProcessor {
-            endianness: endianness,
+        NativeProcessor {
+            endianness,
             phantom: PhantomData,
-        };
+        }
     }
 }
 

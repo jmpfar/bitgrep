@@ -14,7 +14,7 @@ impl<T: std::cmp::PartialOrd> Filter<T> for Min<T> {
 
 impl<T> Min<T> {
     pub fn new(min: T) -> Min<T> {
-        return Min { min: min };
+        return Min { min };
     }
 
     pub fn with_box(min: T) -> Box<Min<T>> {
@@ -28,22 +28,22 @@ mod tests {
 
     #[test]
     fn min_smaller_returns_false() {
-        assert_eq!(false, Min::new(32.445).include(32.0));
-        assert_eq!(false, Min::new(32).include(31));
-        assert_eq!(false, Min::new(40u8).include(0));
+        assert!(!Min::new(32.445).include(32.0));
+        assert!(!Min::new(32).include(31));
+        assert!(!Min::new(40u8).include(0));
     }
 
     #[test]
     fn min_equal_returns_true() {
-        assert_eq!(true, Min::new(32.445).include(32.445));
-        assert_eq!(true, Min::new(31).include(31));
-        assert_eq!(true, Min::new(40u8).include(40u8));
+        assert!(Min::new(32.445).include(32.445));
+        assert!(Min::new(31).include(31));
+        assert!(Min::new(40u8).include(40u8));
     }
 
     #[test]
     fn min_greater_returns_false() {
-        assert_eq!(true, Min::new(30.445).include(32.0));
-        assert_eq!(true, Min::new(30).include(31));
-        assert_eq!(true, Min::new(40u8).include(44));
+        assert!(Min::new(30.445).include(32.0));
+        assert!(Min::new(30).include(31));
+        assert!(Min::new(40u8).include(44));
     }
 }

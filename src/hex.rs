@@ -10,7 +10,7 @@ pub enum DecodeHexError {
     InvalidHexFormat(String),
 }
 
-pub fn decode_hex(s: &str) -> Result<Vec<u8>, DecodeHexError> {
+pub fn decode(s: &str) -> Result<Vec<u8>, DecodeHexError> {
     if s.len() % 2 != 0 {
         return Err(DecodeHexError::InvalidHexFormat(s.to_string()));
     }
@@ -29,19 +29,19 @@ pub fn decode_hex(s: &str) -> Result<Vec<u8>, DecodeHexError> {
     return Ok(result?);
 }
 
-pub fn encode_hex(bytes: Vec<u8>) -> String {
+pub fn encode(bytes: Vec<u8>) -> String {
     let mut result = String::new();
     for byte in bytes {
-        write!(&mut result, "{:x}", byte).expect("Failed writing to perfectly good string");
+        write!(&mut result, "{byte:x}").expect("Failed writing to perfectly good string");
     }
 
     return result;
 }
 
-pub fn encode_hex_borrowed(bytes: &[u8]) -> String {
+pub fn encode_borrowed(bytes: &[u8]) -> String {
     let mut result = String::new();
     for byte in bytes {
-        write!(&mut result, "{:x}", byte).expect("Failed writing to perfectly good string");
+        write!(&mut result, "{byte:x}").expect("Failed writing to perfectly good string");
     }
 
     return result;

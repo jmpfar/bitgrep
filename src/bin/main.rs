@@ -25,6 +25,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let mut grepper: Scanner = Scanner::new(args.file, args.min, args.max, args.endianess);
+    let mut grepper: Scanner = Scanner::new(args.file.as_str(), args.min, args.max, args.endianess);
     let _ = grepper.scan();
 }

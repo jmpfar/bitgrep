@@ -18,17 +18,19 @@ pub struct Scanner<'a> {
 }
 
 impl<'a> Scanner<'a> {
+
+    #[must_use]
     pub fn new(
-        file_path: String,
+        file_path: &str,
         minimum: Option<f64>,
         maximum: Option<f64>,
         endianness: Endianness,
     ) -> Self {
-        let file = File::open(file_path.as_str()).expect("File should be opened");
+        let file = File::open(file_path).expect("File should be opened");
 
         return Self {
             // TODO(danilan): Return float support from the dead
-            file_path: file_path.clone(),
+            file_path: file_path.to_owned(),
             filebuffer: FileBuffer::new(file),
             filter: Self::create_filters(minimum, maximum),
             processor: Self::create_processor(endianness),
@@ -79,7 +81,7 @@ impl<'a> Scanner<'a> {
                     "{}: [{cur_pos:#01X}] double: {} [{}]",
                     self.file_path,
                     result.unwrap(),
-                    hex::encode_hex_borrowed(&data),
+                    hex::encode_borrowed(data),
                 );
             }
 
