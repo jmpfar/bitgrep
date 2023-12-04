@@ -1,6 +1,5 @@
 use super::filter::Filter;
 
-
 /// Implements an inclusive maximum filter
 /// Filters values > max
 pub(crate) struct Max<T> {
@@ -20,7 +19,7 @@ impl<T> Max<T> {
 
     pub fn with_box(max: T) -> Box<Max<T>> {
         return Box::new(Self::new(max));
-    }    
+    }
 }
 
 #[cfg(test)]

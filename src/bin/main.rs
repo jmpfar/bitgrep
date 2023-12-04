@@ -1,6 +1,6 @@
-use clap::Parser;
-use bingrep::scanner::Scanner;
 use bingrep::common::Endianness;
+use bingrep::scanner::Scanner;
+use clap::Parser;
 
 /// Forensics grep.
 #[derive(Parser, Debug)]

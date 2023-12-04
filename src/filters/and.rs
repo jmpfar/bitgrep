@@ -9,7 +9,9 @@ pub(crate) struct And<T> {
 }
 
 impl<T> Filter<T> for And<T>
-where T : Copy {
+where
+    T: Copy,
+{
     fn include(&self, result: T) -> bool {
         return self.filters.iter().all(|x| x.include(result));
     }
@@ -36,13 +38,12 @@ impl<T> And<T> {
 mod tests {
     use super::*;
 
-
     struct EqualFilter(i32);
 
     impl Filter<i32> for EqualFilter {
         fn include(&self, result: i32) -> bool {
             return self.0 == result;
-        }        
+        }
     }
 
     #[test]
@@ -77,5 +78,4 @@ mod tests {
         assert_eq!(false, and.include(3));
         assert_eq!(true, and.include(2));
     }
-
 }

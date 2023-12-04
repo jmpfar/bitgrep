@@ -22,7 +22,6 @@ impl<T> Min<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -47,6 +46,4 @@ mod tests {
         assert_eq!(true, Min::new(30).include(31));
         assert_eq!(true, Min::new(40u8).include(44));
     }
-
-
 }

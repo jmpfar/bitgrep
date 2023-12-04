@@ -147,10 +147,7 @@ mod tests {
 
         let result = buffer.peek(10).expect("peek to succeed");
 
-        assert_eq!(
-            [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8],
-            result
-        );
+        assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result);
     }
 
     #[test]
@@ -161,10 +158,7 @@ mod tests {
 
         let result = buffer.peek(12).expect("peek to succeed");
 
-        assert_eq!(
-            [1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8],
-            result
-        );
+        assert_eq!([1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8], result);
     }
 
     #[test]
