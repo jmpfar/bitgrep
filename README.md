@@ -14,7 +14,7 @@ You can run the CLI binary either through `cargo run`:
 $ cargo run -- --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
 
-This finds all the doubles (`f64`) with values 29.15 <= x <= 36.0, use the following command:
+This finds all the doubles (`f64`) with values `29.15 <= x <= 36.0`.
 
 Alternatively, you can build a binary:
 
@@ -29,7 +29,7 @@ $ cd target/debug
 $ bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
 
-In order to find a single literal value you need to use a hack. Use a minimum and maximum that is equal to the value you're looking for:
+In order to find a single literal value you currently need to use a hack. Use a minimum and maximum that is equal to the value you're looking for:
 
 ```bash
 $ cargo run -- --data-type i128 --file data4.raw -m 36 -M 36 --endian big
@@ -71,8 +71,10 @@ Feel free to send these pull requests, hopefully I'll get to these before 2026
 3. Hex dump output
 4. Literals search
 5. Hex search (e.g. `0AAD[33-4A]DF`)
-6. Recursive file search / glob
-7. Date types
+6. Exclude zeros and special valus (`NaN`, Infinty)
+7. Sane error messages
+8. Recursive file search / glob
+9. Date types
    1. 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
    2. Windows
       1. FILETIME
@@ -80,16 +82,16 @@ Feel free to send these pull requests, hopefully I'll get to these before 2026
       3. OLE automation
       4. CLR Time
    3. Apple timestamps
-8. String Search
+10. String Search
    1. UTF-8
    2. UTF-16
    3. ASCII code pages
    4. Search string representations of number range: e.g. "10.2" .. "10.722"
    5. Regex
-9. Performance improvements
+11. Performance improvements
    1. Convert to static dispatch
-10. Rule engine, see below
-11. Misc
+12. Rule engine, see below
+13. Misc
     1.  GUIDs
     2.  IP addresses
     3.  Custom structs
@@ -122,6 +124,6 @@ An imagined JSON of a rules file that can be used as a search configuration.
 
 ```
 
-The idea is having predefined rules for specific scenarios and some level of boolean operators for better filtering. 
+The idea is to have predefined rules for specific scenarios and some level of boolean operators for better filtering. 
 
-For example, get me only the files that have both an int in range 423..632 and a double in 34.333..37.22.
+For example, get me all IPs in binary or string form in the ranges `192.168.1.0 - 192.168.3.255` or `10.0.0.1 - 10.0.30.255`
