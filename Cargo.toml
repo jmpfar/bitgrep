@@ -1,5 +1,5 @@
 [package]
-name = "bingrep"
+name = "bitgrep"
 version = "0.1.0"
 edition = "2021"
 authors = ["Dan Ilan <15796788+jmpfar@users.noreply.github.com>"]
@@ -12,11 +12,11 @@ clap = { version = "4.4.8", features = ["derive"] }
 thiserror = "1.0.50"
 
 [lib]
-name = "bingrep"
+name = "bitgrep"
 path = "src/lib.rs"
 
 [[bin]]
-name = "bingrep"
+name = "bitgrep"
 path = "src/bin/main.rs"
 
 

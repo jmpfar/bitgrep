@@ -2,11 +2,11 @@ use std::error::Error;
 use std::fmt::Display;
 use std::str::FromStr;
 
-use bingrep::common::{DataType, Endianness};
-use bingrep::filters::filter::create_filters;
-use bingrep::scanner::Scanner;
-use bingrep::workers::convertors::{FromBigEndian, FromLittleEndian};
-use bingrep::workers::native_processor::NativeProcessor;
+use bitgrep::common::{DataType, Endianness};
+use bitgrep::filters::filter::create_filters;
+use bitgrep::scanner::Scanner;
+use bitgrep::workers::convertors::{FromBigEndian, FromLittleEndian};
+use bitgrep::workers::native_processor::NativeProcessor;
 use clap::Parser;
 
 /// Forensics grep.

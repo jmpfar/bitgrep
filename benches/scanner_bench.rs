@@ -1,7 +1,7 @@
-use bingrep::common::Endianness;
-use bingrep::filters::filter::create_filters;
-use bingrep::scanner::Scanner;
-use bingrep::workers::native_processor::NativeProcessor;
+use bitgrep::common::Endianness;
+use bitgrep::filters::filter::create_filters;
+use bitgrep::scanner::Scanner;
+use bitgrep::workers::native_processor::NativeProcessor;
 use std::path::Path;
 
 use criterion::{criterion_group, criterion_main, Criterion};
