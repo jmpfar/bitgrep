@@ -14,6 +14,8 @@ where
     T: FromLittleEndian<Output = T>,
     T: FromBigEndian<Output = T>,
 {
+
+    // TODO(danilan): change interface to not return directly
     fn consume(&self, bytes: &[u8]) -> Option<T> {
         if bytes.len() < self.chunk_size() {
             // Not enough bytes supplied
@@ -57,6 +59,9 @@ mod tests {
 
     #[test]
     fn chunk_sizes() {
+        assert_eq!(NativeProcessor::<i16>::with_big_endian().chunk_size(), 2);
+        assert_eq!(NativeProcessor::<u16>::with_big_endian().chunk_size(), 2);
+
         assert_eq!(NativeProcessor::<i32>::with_big_endian().chunk_size(), 4);
         assert_eq!(NativeProcessor::<f32>::with_big_endian().chunk_size(), 4);
         assert_eq!(NativeProcessor::<u32>::with_big_endian().chunk_size(), 4);
@@ -64,10 +69,32 @@ mod tests {
         assert_eq!(NativeProcessor::<i64>::with_little_endian().chunk_size(), 8);
         assert_eq!(NativeProcessor::<f64>::with_little_endian().chunk_size(), 8);
         assert_eq!(NativeProcessor::<u64>::with_little_endian().chunk_size(), 8);
+
+        assert_eq!(NativeProcessor::<i128>::with_little_endian().chunk_size(), 16);
+        assert_eq!(NativeProcessor::<u128>::with_little_endian().chunk_size(), 16);        
     }
 
     #[test]
-    fn consume() {
-        todo!("write consume test and fix interface");
+    fn consume_big() {
+        let processor: NativeProcessor<_> = NativeProcessor::new(Endianness::Big);
+        let result : i32 = processor.consume(&[0u8, 0u8, 0x10u8, 0xf8u8]).unwrap();
+        
+        assert_eq!(result, 4344);
     }
+
+    #[test]
+    fn consume_little() {
+        let processor: NativeProcessor<_> = NativeProcessor::new(Endianness::Little);
+        let result : i32 = processor.consume(&[0xf8u8, 0x10u8, 0u8, 0u8]).unwrap();
+        
+        assert_eq!(result, 4344);
+    }    
+
+    #[test]
+    fn consume_not_enough_bytes_returns_none() {
+        let processor: NativeProcessor<i128> = NativeProcessor::new(Endianness::Little);
+        let result = processor.consume(&[0u8, 0u8, 0x10u8, 0xf8u8]);
+        
+        assert!(result.is_none());
+    }    
 }
