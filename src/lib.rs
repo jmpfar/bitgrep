@@ -1,7 +1,9 @@
 pub mod common;
 pub mod scanner;
+pub mod filters;
+pub mod workers;
 
 mod filebuffer;
-mod filters;
+
 mod hex;
-mod workers;
+

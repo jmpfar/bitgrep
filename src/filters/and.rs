@@ -4,7 +4,7 @@ type BoxedFilter<T> = Box<dyn Filter<T>>;
 
 /// Boolean And filter
 /// Values must match all of the included filters
-pub(crate) struct And<T> {
+pub(super) struct And<T> {
     filters: Vec<BoxedFilter<T>>,
 }
 

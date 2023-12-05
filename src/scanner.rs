@@ -1,75 +1,53 @@
+use std::fmt::Display;
 use std::{error::Error, fs::File};
 
-use crate::common::Endianness;
 use crate::filebuffer::FileBuffer;
-use crate::filters::and::And;
 use crate::filters::filter::Filter;
-use crate::filters::max::Max;
-use crate::filters::min::Min;
 use crate::hex;
-use crate::workers::native_processor::NativeProcessor;
 use crate::workers::processors::Processor;
 
-pub struct Scanner<'a> {
+pub struct Scanner<'a, T> {
     file_path: String,
     filebuffer: FileBuffer<'a>,
-    filter: Box<dyn Filter<f64>>,
-    processor: NativeProcessor<f64>,
+
+    // TODO(danilan): Move to static dispatch
+    filter: Box<dyn Filter<T>>,
+    processor: Box<dyn Processor<T>>,
 }
 
-impl<'a> Scanner<'a> {
+impl<'a, T> Scanner<'a, T>
+where T : Display + Copy
+{
 
     #[must_use]
     pub fn new(
         file_path: &str,
-        minimum: Option<f64>,
-        maximum: Option<f64>,
-        endianness: Endianness,
+        processor: Box<dyn Processor<T>>,
+        filter: Box<dyn Filter<T>>
     ) -> Self {
         let file = File::open(file_path).expect("File should be opened");
 
         return Self {
-            // TODO(danilan): Return float support from the dead
             file_path: file_path.to_owned(),
             filebuffer: FileBuffer::new(file),
-            filter: Self::create_filters(minimum, maximum),
-            processor: Self::create_processor(endianness),
+            filter,
+            processor,
         };
-    }
+    }  
 
     pub fn scan(&mut self) -> Result<usize, Box<dyn Error>> {
         let position = self.scan_buffer()?;
         Ok(position)
     }
 
-    fn create_filters(minimum: Option<f64>, maximum: Option<f64>) -> Box<dyn Filter<f64>> {
-        let mut filters: Vec<Box<dyn Filter<f64>>> = vec![];
-        if let Some(min) = minimum {
-            filters.push(Min::with_box(min));
-        }
-
-        if let Some(max) = maximum {
-            filters.push(Max::with_box(max));
-        }
-
-        if filters.len() == 1 {
-            return filters.remove(0);
-        }
-
-        return Box::new(And::with_filters(filters));
-    }
-
-    fn create_processor(endianness: Endianness) -> NativeProcessor<f64> {
-        return NativeProcessor::new(endianness);
-    }
 
     fn scan_buffer(&mut self) -> Result<usize, Box<dyn Error>> {
+        let type_name = std::any::type_name::<T>();
         let chunk_size = self.processor.chunk_size();
         loop {
             let cur_pos = self.filebuffer.position();
             let data = self.filebuffer.peek(chunk_size)?;
 
-            // TODO: Change to vector
             let result = self.processor.consume(data);
 
             if result.is_none() {
@@ -78,8 +56,9 @@ impl<'a> Scanner<'a> {
 
             if self.filter.include_unwrap(result) {
                 println!(
-                    "{}: [{cur_pos:#01X}] double: {} [{}]",
+                    "{}: [{cur_pos:#01X}] {}: {} [{}]",
                     self.file_path,
+                    type_name,
                     result.unwrap(),
                     hex::encode_borrowed(data),
                 );
@@ -97,17 +76,25 @@ impl<'a> Scanner<'a> {
 mod tests {
     use super::Scanner;
     use crate::{
-        common::Endianness, filebuffer::FileBuffer, filters::and::And,
-        workers::native_processor::NativeProcessor,
+        common::Endianness, filebuffer::FileBuffer,
+        workers::native_processor::NativeProcessor, filters::filter::Filter,
     };
+
+    struct TrueFilter;
+
+    impl<T> Filter<T> for TrueFilter {
+        fn include(&self, result: T) -> bool {
+            return true;
+        }
+    }
 
     #[test]
     fn scan_buffer() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-        let mut double_grepper = Scanner {
+        let mut double_grepper = Scanner::<f64> {
             file_path: "ok".into(),
-            filter: Box::new(And::new()), // Empty filter
-            processor: NativeProcessor::new(Endianness::Little),
+            filter: Box::new(TrueFilter{}),
+            processor: Box::new(NativeProcessor::new(Endianness::Little)),
             filebuffer: FileBuffer::new(buf.as_slice()),
         };
 
@@ -118,10 +105,10 @@ mod tests {
     #[test]
     fn scan_buffer_big() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-        let mut double_grepper = Scanner {
+        let mut double_grepper = Scanner::<i64> {
             file_path: "ok".into(),
-            filter: Box::new(And::new()), // Empty filter
-            processor: NativeProcessor::new(Endianness::Big),
+            filter: Box::new(TrueFilter{}), // Empty filter
+            processor: Box::new(NativeProcessor::new(Endianness::Big)),
             filebuffer: FileBuffer::new(buf.as_slice()),
         };
 

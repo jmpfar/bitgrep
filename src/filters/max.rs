@@ -2,7 +2,7 @@ use super::filter::Filter;
 
 /// Implements an inclusive maximum filter
 /// Filters values > max
-pub(crate) struct Max<T> {
+pub(super) struct Max<T> {
     max: T,
 }
 

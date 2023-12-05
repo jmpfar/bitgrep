@@ -2,7 +2,7 @@ use super::filter::Filter;
 
 /// Implements an inclusive minimum filter
 /// Filters values < min
-pub(crate) struct Min<T> {
+pub(super) struct Min<T> {
     min: T,
 }
 

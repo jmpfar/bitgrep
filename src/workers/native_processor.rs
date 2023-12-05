@@ -4,7 +4,7 @@ use crate::common::Endianness;
 use std::marker::PhantomData;
 use std::mem;
 
-pub(crate) struct NativeProcessor<T> {
+pub struct NativeProcessor<T> {
     endianness: Endianness,
     phantom: PhantomData<T>, // TODO(danilan): Remove
 }

@@ -1,4 +1,4 @@
-pub(super) trait FromLittleEndian {
+pub trait FromLittleEndian {
     type Output;
 
     fn from_bytes(bytes: &[u8]) -> Self::Output;
@@ -148,7 +148,7 @@ impl FromLittleEndian for u128 {
     }
 }
 
-pub(super) trait FromBigEndian {
+pub trait FromBigEndian {
     type Output;
 
     fn from_bytes(bytes: &[u8]) -> Self::Output;
