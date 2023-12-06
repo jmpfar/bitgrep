@@ -14,19 +14,20 @@ You can run the CLI binary either through `cargo run`:
 $ cargo run -- --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
 
-This finds all the doubles (`f64`) with values `29.15 <= x <= 36.0`.
+The above command finds all the doubles (`f64`) with values `29.15 <= x <= 36.0`.
 
 Alternatively, you can build a binary:
 
 ```bash
-$ cargo build
+$ git clone https://github.com/jmpfar/bitgrep.git
+$ cd bitgrep
+$ cargo build --release
 ```
 
 and then run the binary:
 
 ```bash
-$ cd target/debug
-$ bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
+$ target/release/bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
 
 In order to find a single literal value you currently need to use a hack. Use a minimum and maximum that is equal to the value you're looking for:
@@ -38,7 +39,8 @@ $ cargo run -- --data-type i128 --file data4.raw -m 36 -M 36 --endian big
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
 
 ```bash
-$ find . -type f -exec /path/to/bitgrep --data-type i32 --file {} --max -78 --min -83 --endian little \;
+$ find . -type f -exec /path/to/bitgrep \ 
+    --data-type i32 --file {} --max -78 --min -83 --endian little \;
 ```
 
 
