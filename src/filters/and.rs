@@ -18,12 +18,14 @@ where
 }
 
 impl<T> And<T> {
+    #[must_use]
     pub fn new() -> And<T> {
         return And {
             filters: Vec::new(),
         };
     }
 
+    #[must_use]
     pub fn with_filters(filters: Vec<BoxedFilter<T>>) -> And<T> {
         return And { filters };
     }

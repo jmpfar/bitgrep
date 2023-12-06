@@ -37,14 +37,17 @@ where
 }
 
 impl<T> NativeProcessor<T> {
+    #[must_use]
     pub fn with_little_endian() -> NativeProcessor<T> {
         Self::new(Endianness::Little)
     }
 
+    #[must_use]
     pub fn with_big_endian() -> NativeProcessor<T> {
         Self::new(Endianness::Big)
     }
 
+    #[must_use]
     pub fn new(endianness: Endianness) -> NativeProcessor<T> {
         NativeProcessor {
             endianness,

@@ -83,7 +83,7 @@ mod tests {
     struct TrueFilter;
 
     impl<T> Filter<T> for TrueFilter {
-        fn include(&self, result: T) -> bool {
+        fn include(&self, _: T) -> bool {
             return true;
         }
     }
