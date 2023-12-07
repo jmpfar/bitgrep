@@ -1,6 +1,6 @@
 # bitgrep
 
-It's grep for data types. Ever found yourself looking for a specific double value/range in a heap of binary files?
+It's grep for data types. Ever found yourself looking for a specific numerical value/range in a heap of binary files?
 
 Now you can! 
 
