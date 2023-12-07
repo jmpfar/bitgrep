@@ -78,21 +78,21 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 7. Sane error messages
 8. Recursive file search / glob
 9. Date types
-   1. 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
-   2. Windows
-      1. FILETIME
-      2. SYSTEMTIME
-      3. OLE automation
-      4. CLR Time
-   3. Apple timestamps
+    1. 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
+    2. Windows
+        1. FILETIME
+        2. SYSTEMTIME
+        3. OLE automation
+        4. CLR Time
+    3. Apple timestamps
 10. String Search
-   1. UTF-8
-   2. UTF-16
-   3. ASCII code pages
-   4. Search string representations of number range: e.g. "10.2" .. "10.722"
-   5. Regex
+    1. UTF-8
+    2. UTF-16
+    3. ASCII code pages
+    4. Search string representations of number range: e.g. "10.2" .. "10.722"
+    5. Regex
 11. Performance improvements
-   1. Convert to static dispatch
+    1. Convert to static dispatch
 12. Rule engine, see below
 13. Misc
     1.  GUIDs
@@ -101,7 +101,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 
 
 ### Rule engine
-An imagined JSON of a rules file that can be used as a search configuration.
+TODO: An imagined JSON of a rules file that can be used as a search configuration.
 
 ```json
 {
