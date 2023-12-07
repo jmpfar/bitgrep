@@ -1,4 +1,6 @@
-use super::{min::Min, max::Max, and::And};
+use crate::{types::{bit_type::BitType, compare::Compare}};
+
+use super::{and::And, equal::Equal,max::Max, min::Min};
 
 /// Filters a result according to configuration
 pub trait Filter<T> {
@@ -15,10 +17,26 @@ pub trait Filter<T> {
     }
 }
 
-pub fn create_filters<T>(minimum: Option<T>, maximum: Option<T>) -> Box<dyn Filter<T>>
+pub fn create_filters<T>(
+    minimum: Option<T>,
+    maximum: Option<T>,
+    literal: Option<T>,
+) -> Box<dyn Filter<T>>
 where
     // static cause T is owned due to being a native type
-    T: PartialOrd + Copy + 'static,
+    T: Compare + 'static
+{
+    if let Some(unwrapped) = literal {
+        return Equal::with_box(unwrapped);
+    }
+
+    return create_min_max_filters(minimum, maximum);
+}
+
+fn create_min_max_filters<T>(minimum: Option<T>, maximum: Option<T>) -> Box<dyn Filter<T>>
+where
+    // static cause T is owned due to being a native type
+    T: BitType + 'static,
 {
     let mut filters: Vec<Box<dyn Filter<T>>> = vec![];
     if let Some(min) = minimum {

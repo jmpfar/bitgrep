@@ -1,11 +1,11 @@
 use std::error::Error;
-use std::fmt::Display;
 use std::str::FromStr;
 
 use bitgrep::common::{DataType, Endianness};
-use bitgrep::filters::filter::create_filters;
+use bitgrep::filters::filter::{self};
 use bitgrep::scanner::Scanner;
-use bitgrep::workers::convertors::{FromBigEndian, FromLittleEndian};
+use bitgrep::types::compare::Compare;
+use bitgrep::types::endian::{FromBigEndian, FromLittleEndian};
 use bitgrep::workers::native_processor::NativeProcessor;
 use clap::Parser;
 
@@ -21,12 +21,25 @@ struct Args {
     data_type: DataType,
 
     /// Minimum value to match
-    #[arg(long, short = 'm', allow_hyphen_values = true)]
+    #[arg(
+        long,
+        short = 'm',
+        allow_hyphen_values = true,
+        conflicts_with = "literal"
+    )]
     min: Option<String>,
 
     /// Maximum value to match
-    #[arg(long, short = 'M', allow_hyphen_values = true)]
+    #[arg(
+        long,
+        short = 'M',
+        allow_hyphen_values = true,
+        conflicts_with = "literal"
+    )]
     max: Option<String>,
+
+    #[arg(long, short = 'l', allow_hyphen_values = true, conflicts_with_all= ["min", "max"])]
+    literal: Option<String>,
 
     #[clap(value_enum, long = "endian", short = 'e', default_value_t = Endianness::Little)]
     endianess: Endianness,
@@ -45,11 +58,12 @@ fn run<T>(
     file_path: &str,
     min: Option<String>,
     max: Option<String>,
+    literal: Option<String>,
     endianness: Endianness,
 ) -> Result<(), Box<dyn Error>>
 where
-    // TODO(danilan): Fix this mess, do we really need this?s
-    T: FromStr + Copy + PartialOrd + Display + 'static,
+    T: Compare + 'static,
+    // TODO(danilan): Fix this mess, do we really need this?
     T: FromLittleEndian<Output = T> + FromBigEndian<Output = T>,
     <T as std::str::FromStr>::Err: std::error::Error,
 {
@@ -57,8 +71,9 @@ where
 
     let min = parse_num::<T>(min)?;
     let max = parse_num::<T>(max)?;
+    let literal = parse_num(literal)?;
 
-    let filter = create_filters(min, max);
+    let filter = filter::create_filters(min, max, literal);
 
     let mut grepper = Scanner::<T>::new(file_path, Box::new(processor), filter);
     grepper.scan()?;
@@ -71,21 +86,22 @@ fn run_type(
     file_path: &str,
     min: Option<String>,
     max: Option<String>,
+    literal: Option<String>,
     endianness: Endianness,
 ) -> Result<(), Box<dyn Error>> {
     match data_type {
-        DataType::I8 => run::<i8>(file_path, min, max, endianness),
-        DataType::I16 => run::<i16>(file_path, min, max, endianness),
-        DataType::I32 => run::<i32>(file_path, min, max, endianness),
-        DataType::I64 => run::<i64>(file_path, min, max, endianness),
-        DataType::I128 => run::<i128>(file_path, min, max, endianness),
-        DataType::U8 => run::<u8>(file_path, min, max, endianness),
-        DataType::U16 => run::<u16>(file_path, min, max, endianness),
-        DataType::U32 => run::<u32>(file_path, min, max, endianness),
-        DataType::U64 => run::<u64>(file_path, min, max, endianness),
-        DataType::U128 => run::<u128>(file_path, min, max, endianness),
-        DataType::F32 => run::<f32>(file_path, min, max, endianness),
-        DataType::F64 => run::<f64>(file_path, min, max, endianness),
+        DataType::I8 => run::<i8>(file_path, min, max, literal, endianness),
+        DataType::I16 => run::<i16>(file_path, min, max, literal, endianness),
+        DataType::I32 => run::<i32>(file_path, min, max, literal, endianness),
+        DataType::I64 => run::<i64>(file_path, min, max, literal, endianness),
+        DataType::I128 => run::<i128>(file_path, min, max, literal, endianness),
+        DataType::U8 => run::<u8>(file_path, min, max, literal, endianness),
+        DataType::U16 => run::<u16>(file_path, min, max, literal, endianness),
+        DataType::U32 => run::<u32>(file_path, min, max, literal, endianness),
+        DataType::U64 => run::<u64>(file_path, min, max, literal, endianness),
+        DataType::U128 => run::<u128>(file_path, min, max, literal, endianness),
+        DataType::F32 => run::<f32>(file_path, min, max, literal, endianness),
+        DataType::F64 => run::<f64>(file_path, min, max, literal, endianness),
     }
 }
 
@@ -97,6 +113,7 @@ fn main() {
         args.file.as_str(),
         args.min,
         args.max,
+        args.literal,
         args.endianess,
     )
     .expect("should succeed");

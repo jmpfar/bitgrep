@@ -6,6 +6,8 @@ use crate::filters::filter::Filter;
 use crate::hex;
 use crate::workers::processors::Processor;
 
+/// Scans a file for data types that match a filter
+/// T is the type to be scanned
 pub struct Scanner<'a, T> {
     file_path: String,
     filebuffer: FileBuffer<'a>,

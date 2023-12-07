@@ -30,10 +30,11 @@ and then run the binary:
 $ target/release/bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
 
-In order to find a single literal value you currently need to use a hack. Use a minimum and maximum that is equal to the value you're looking for:
+In order to find a single literal value you can use the `--literal` or `-l` flag. 
+Float comparison is approximate with a [ULPS](https://en.wikipedia.org/wiki/Unit_in_the_last_place) of 4 (will be configurable in the future):
 
 ```bash
-$ cargo run -- --data-type i128 --file data4.raw -m 36 -M 36 --endian big
+$ cargo run -- --data-type f64 --file data4.raw --literal 29.15385732 --endian big
 ```
 
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
@@ -66,7 +67,7 @@ Currently bitgrep supports all rust numeric data types (use with `--data-type`):
 > [!WARNING]  
 >  Everything below this point does not exist yet!
 
-Feel free to send these pull requests, hopefully I'll get to these before 2026
+Feel free to send pull requests, hopefully I'll get to these before 2026
 
 1. Filter files by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
 2. Color output

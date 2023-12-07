@@ -1,10 +1,11 @@
-use super::convertors::{FromBigEndian, FromLittleEndian};
+use crate::types::endian::{FromBigEndian, FromLittleEndian};
 use super::processors::Processor;
 use crate::common::Endianness;
 use std::marker::PhantomData;
 use std::mem;
 
-pub struct NativeProcessor<T> {
+pub struct NativeProcessor<T>
+{
     endianness: Endianness,
     phantom: PhantomData<T>, // TODO(danilan): Remove
 }
@@ -36,7 +37,11 @@ where
     }
 }
 
-impl<T> NativeProcessor<T> {
+impl<T> NativeProcessor<T>
+where
+    T: FromLittleEndian<Output = T>,
+    T: FromBigEndian<Output = T>,
+{
     #[must_use]
     pub fn with_little_endian() -> NativeProcessor<T> {
         Self::new(Endianness::Little)
