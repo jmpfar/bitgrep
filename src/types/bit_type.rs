@@ -1,10 +1,14 @@
-use std::{fmt::Display, num::FpCategory};
+use std::fmt::Display;
 use std::str::FromStr;
 
-use super::endian::{FromLittleEndian, FromBigEndian};
+use super::endian::{FromBigEndian, FromLittleEndian};
 
-// TODO(danilan): Fix FromLittleEndian/Big by removing T
-pub trait BitType : FromStr + Copy + PartialOrd + Display + FromLittleEndian + FromBigEndian  { }
+/// A general marker trait that represents a type that bitgrep supports.
+/// Used as part of the generics black magic
+pub trait BitType:
+    FromStr + Copy + PartialOrd + Display + FromLittleEndian + FromBigEndian
+{
+}
 
 impl BitType for f32 {}
 impl BitType for f64 {}
@@ -21,13 +25,13 @@ impl BitType for u32 {}
 impl BitType for u64 {}
 impl BitType for u128 {}
 
-pub trait Float: BitType + approx::UlpsEq{
+pub trait Float: BitType + approx::UlpsEq {
     fn is_nan(self) -> bool;
     fn is_pos_infinity(self) -> bool;
     fn is_neg_infinity(self) -> bool;
 }
 
-impl Float for f32 {  
+impl Float for f32 {
     fn is_nan(self) -> bool {
         return self.is_nan();
     }
@@ -37,7 +41,7 @@ impl Float for f32 {
     }
 
     fn is_neg_infinity(self) -> bool {
-        return self.is_infinite() && self.is_sign_negative()
+        return self.is_infinite() && self.is_sign_negative();
     }
 }
 impl Float for f64 {
@@ -46,11 +50,10 @@ impl Float for f64 {
     }
 
     fn is_pos_infinity(self) -> bool {
-        return self.is_infinite() && self.is_sign_positive()
+        return self.is_infinite() && self.is_sign_positive();
     }
 
     fn is_neg_infinity(self) -> bool {
-        return self.is_infinite() && self.is_sign_negative()
-    }    
+        return self.is_infinite() && self.is_sign_negative();
+    }
 }
-

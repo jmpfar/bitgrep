@@ -1,3 +1,4 @@
+use crate::types::bit_type::BitType;
 use crate::types::endian::{FromBigEndian, FromLittleEndian};
 use super::processors::Processor;
 use crate::common::Endianness;
@@ -12,8 +13,7 @@ pub struct NativeProcessor<T>
 
 impl<T> Processor<T> for NativeProcessor<T>
 where
-    T: FromLittleEndian<Output = T>,
-    T: FromBigEndian<Output = T>,
+    T: BitType
 {
 
     // TODO(danilan): change interface to not return directly
@@ -39,8 +39,7 @@ where
 
 impl<T> NativeProcessor<T>
 where
-    T: FromLittleEndian<Output = T>,
-    T: FromBigEndian<Output = T>,
+    T: BitType
 {
     #[must_use]
     pub fn with_little_endian() -> NativeProcessor<T> {

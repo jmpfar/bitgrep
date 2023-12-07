@@ -5,7 +5,6 @@ use bitgrep::common::{DataType, Endianness};
 use bitgrep::filters::filter::{self};
 use bitgrep::scanner::Scanner;
 use bitgrep::types::compare::Compare;
-use bitgrep::types::endian::{FromBigEndian, FromLittleEndian};
 use bitgrep::workers::native_processor::NativeProcessor;
 use clap::Parser;
 
@@ -63,8 +62,6 @@ fn run<T>(
 ) -> Result<(), Box<dyn Error>>
 where
     T: Compare + 'static,
-    // TODO(danilan): Fix this mess, do we really need this?
-    T: FromLittleEndian<Output = T> + FromBigEndian<Output = T>,
     <T as std::str::FromStr>::Err: std::error::Error,
 {
     let processor = NativeProcessor::<T>::new(endianness);
