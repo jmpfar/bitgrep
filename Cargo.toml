@@ -3,7 +3,13 @@ name = "bitgrep"
 version = "0.1.0"
 edition = "2021"
 authors = ["Dan Ilan <15796788+jmpfar@users.noreply.github.com>"]
+description= "Binary grep for numerical data types"
+repository = "https://github.com/jmpfar/bitgrep"
 license = "Apache-2.0"
+readme = "README.md"
+keywords = ["research", "binary", "forensics", "dfir", "grep"]
+categories = ["command-line-utilities", "development-tools::debugging"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
