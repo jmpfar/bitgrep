@@ -133,5 +133,7 @@ fn run_type(data_type: DataType, args: &Args) -> Result<(), Box<dyn Error>> {
 fn main() {
     let args = Args::parse();
 
-    run_type(args.data_type.clone(), &args).expect("should succeed");
+    if let Err(error) = run_type(args.data_type.clone(), &args) {
+        eprintln!("Error: {error}");
+    }
 }

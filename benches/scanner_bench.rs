@@ -19,7 +19,7 @@ fn scanner_random_8k_minmax_benchmark(c: &mut Criterion) {
     let filter = configuration.create_filter();
     let processor = NativeProcessor::new(Endianness::Little);
 
-    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter.unwrap());
+    let mut scanner = Scanner::new(&path, Box::new(processor), filter.unwrap());
 
     c.bench_function(
         format!("scanner.scan() minmax 8k random file [{FILE_NAME}]").as_str(),
@@ -43,7 +43,7 @@ fn scanner_random_8k_literal_benchmark(c: &mut Criterion) {
 
     let processor = NativeProcessor::new(Endianness::Little);
 
-    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter.unwrap());
+    let mut scanner = Scanner::new(&path, Box::new(processor), filter.unwrap());
 
     c.bench_function(
         format!("scanner.scan() literal 8k random file [{FILE_NAME}]").as_str(),
