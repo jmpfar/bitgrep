@@ -5,6 +5,7 @@ use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use crate::common::SourceFile;
 use crate::filebuffer::FileBuffer;
 use crate::filters::filter::Filter;
 use crate::hex;
@@ -30,26 +31,24 @@ where
 {
     #[must_use]
     pub fn new(
-        file_path: PathBuf,
-        file: Box<dyn io::Read + 'a>,
+        file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
     ) -> Self {
-        return Self::with_entropy_processor(file_path, file, processor, filter, None);
+        return Self::with_entropy_processor(file, processor, filter, None);
     }
 
     // TODO(danilan): Add a generic interface for handling different processors
     #[must_use]
     pub fn with_entropy_processor(
-        file_path: PathBuf,
-        file: Box<dyn io::Read + 'a>,
+        file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
         entropy_processor: EntropyProcessorRef<T>,
     ) -> Self {
         return Self {
-            file_path,
-            filebuffer: FileBuffer::new(file),
+            file_path: file.path(),
+            filebuffer: FileBuffer::new(file.file()),
             filter,
             processor,
             entropy_processor,
@@ -100,7 +99,9 @@ where
 mod tests {
     use super::Scanner;
     use crate::{
-        common::Endianness, filters::filter::Filter, workers::native_processor::NativeProcessor,
+        common::{Endianness, SourceFile},
+        filters::filter::Filter,
+        workers::native_processor::NativeProcessor,
     };
 
     struct TrueFilter;
@@ -118,9 +119,10 @@ mod tests {
     fn scan_buffer() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
 
+        let file = SourceFile::new("ok".into(), buf.as_slice());
+
         let mut scanner = Scanner::new(
-            "ok".into(),
-            Box::new(buf.as_slice()),
+            file,
             Box::new(NativeProcessor::<f64>::new(Endianness::Little)),
             Box::new(TrueFilter {}),
         );
@@ -133,9 +135,10 @@ mod tests {
     fn scan_buffer_big() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
 
+        let file = SourceFile::new("ok".into(), buf.as_slice());
+
         let mut scanner = Scanner::new(
-            "ok".into(),
-            Box::new(buf.as_slice()),
+            file,
             Box::new(NativeProcessor::<i64>::new(Endianness::Big)),
             Box::new(TrueFilter {}), // Empty filter
         );

@@ -8,7 +8,7 @@ Useful for DFIR, security research and general debugging work, especially when y
 
 ## Usage
 
-You can run the CLI binary either through `cargo run`:
+You can run the CLI binary through `cargo run`:
 
 ```bash
 $ cargo run -- --data-type f64 --file data.raw -m 29.15 -M 36.0
@@ -44,6 +44,12 @@ or encrypted data:
 $ bitgrep --data-type i128 --file data.raw --literal 123 --max-entropy 7.5
 ```
 
+You can use a pipe with the special `-` file path:
+
+```bash
+$ cat data.raw | bitgrep --data-type u8 --file - --literal 3
+```
+
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
 
 ```bash
@@ -65,7 +71,7 @@ Currently bitgrep supports all rust numeric data types (use with `--data-type`):
 | i128 | __int128 (GCC)    |
 | u16  | unsigned short    |
 | u32  | unsigned int      |
-| u64  | unsigned long     |
+| u64  | unsigned long long|
 | u128 | unsigned __int128 |
 | f32  | float             |
 | f64  | double            |
@@ -77,7 +83,7 @@ Currently bitgrep supports all rust numeric data types (use with `--data-type`):
 Feel free to send pull requests, hopefully I'll get to these before 2026
 
 1. [x] Filter files by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
-2. [ ] Add pipe support and other unix semantics
+2. [x] Add pipe support and other unix semantics
 3. [x] Use stderr
 4. [ ] Color output
 5. [ ] Hex dump output

@@ -1,11 +1,12 @@
 use std::cell::RefCell;
 use std::error::Error;
 use std::fs::File;
+use std::io::{self, stdin, IsTerminal};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use bitgrep::common::{DataType, Endianness, DEFAULT_BUFFER_SIZE};
+use bitgrep::common::{DataType, Endianness, SourceFile, DEFAULT_BUFFER_SIZE};
 use bitgrep::filters::configuration::{Configuration, EntropyConfig};
 use bitgrep::scanner::Scanner;
 use bitgrep::types::compare::Compare;
@@ -21,7 +22,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Files to search
+    /// Path to file, use - to read from stdin (must not be a tty)
     #[arg(short, long)]
     file: PathBuf,
 
@@ -75,6 +76,23 @@ fn parse_num<T: FromStr>(num: Option<String>) -> Option<T> {
     return converted.ok();
 }
 
+fn open_file<'a>(path: PathBuf) -> Result<SourceFile<'a>, Box<dyn Error>> {
+    if path == PathBuf::from("-") {
+        if io::stdin().is_terminal() {
+            let err =
+                Args::command().error(InvalidValue, "using stdin is not supported in TTY mode");
+            err.print();
+            Args::command().print_help().unwrap();
+            ::std::process::exit(2);
+        }
+
+        return Ok(SourceFile::new(PathBuf::from("<stdin>"), stdin().lock()));
+    }
+
+    let file = File::open(&path)?;
+    return Ok(SourceFile::new(path, file));
+}
+
 fn run<T>(args: &Args) -> Result<(), Box<dyn Error>>
 where
     T: Compare + 'static,
@@ -110,15 +128,10 @@ where
     // Unwrap option to coerce type, hell on earth
     let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
 
-    let file = File::open(&args.file)?;
+    let file = open_file(args.file.clone())?;
 
-    let mut scanner = Scanner::<T>::with_entropy_processor(
-        args.file.clone(),
-        Box::new(file),
-        Box::new(processor),
-        filter,
-        entropy_processor,
-    );
+    let mut scanner =
+        Scanner::<T>::with_entropy_processor(file, Box::new(processor), filter, entropy_processor);
     scanner.scan()?;
 
     Ok(())
