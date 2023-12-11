@@ -1,10 +1,7 @@
 use super::filter::Filter;
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{
-    types::{bit_type::BitType, compare::Compare},
-    workers::entropy_processor::EntropyProducer,
-};
+use crate::{types::bit_type::BitType, workers::entropy_processor::EntropyProducer};
 
 type EntropyProducerRef = Rc<RefCell<dyn EntropyProducer>>;
 

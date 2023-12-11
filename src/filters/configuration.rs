@@ -18,17 +18,18 @@ pub struct Configuration<T: Compare + 'static> {
 type BoxedFilter<T> = Box<dyn Filter<T>>;
 
 impl<T: Compare> Configuration<T> {
+
+    #[allow(clippy::option_map_unit_fn)]
     pub fn create_filter(&self) -> Option<BoxedFilter<T>> {
         let mut filters: Vec<BoxedFilter<T>> = Vec::with_capacity(5);
 
         self.create_equal_filter().map(|f| filters.push(f));
-
         self.create_max_filter().map(|f| filters.push(f));
         self.create_min_filter().map(|f| filters.push(f));
 
         self.entropy
             .as_ref()
-            .and_then(|e| e.create_filter())
+            .and_then(EntropyConfig::create_filter)
             .map(|f| filters.push(f));
 
         if filters.is_empty() {

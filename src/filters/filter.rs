@@ -1,7 +1,3 @@
-use crate::types::{bit_type::BitType, compare::Compare};
-
-use super::{and::And, entropy::Entropy, equal::Equal, max::Max, min::Min};
-
 /// Filters a result according to configuration
 pub trait Filter<T> {
     /// Should output the result

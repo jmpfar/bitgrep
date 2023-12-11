@@ -32,8 +32,6 @@ where
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
     ) -> Self {
-        let file = File::open(file_path).expect("File should be opened");
-
         return Self::with_entropy_processor(file_path, processor, filter, None);
     }
 

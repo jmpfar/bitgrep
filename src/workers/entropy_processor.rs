@@ -1,8 +1,4 @@
-use std::{
-    cmp,
-    collections::{vec_deque, VecDeque},
-    marker::PhantomData,
-};
+use std::{cmp, collections::VecDeque, marker::PhantomData};
 
 use super::processors::{ChunkSize, Processor};
 
