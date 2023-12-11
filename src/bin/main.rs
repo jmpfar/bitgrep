@@ -12,6 +12,9 @@ use bitgrep::workers::entropy_processor::EntropyProcessor;
 use bitgrep::workers::native_processor::NativeProcessor;
 use bitgrep::workers::processors::Processor;
 use clap::Parser;
+use clap::error::{ContextValue, ContextKind};
+use clap::error::ErrorKind::InvalidValue;
+use clap::{CommandFactory};
 
 /// Forensics grep.
 #[derive(Parser, Debug)]
@@ -58,13 +61,17 @@ struct Args {
     endianness: Endianness,
 }
 
-fn parse_num<T: FromStr>(num: Option<String>) -> Result<Option<T>, <T as std::str::FromStr>::Err> {
-    if num.is_none() {
-        return Ok(None);
+fn parse_num<T: FromStr>(num: Option<String>) -> Option<T> {
+    let num = num?;
+
+    let converted = T::from_str(num.as_str());
+    if converted.is_err() {
+            let mut err = Args::command().error(InvalidValue, "Failed parsing number");
+            err.insert(ContextKind::InvalidValue, ContextValue::String(num));
+            err.exit();
     }
 
-    let converted = T::from_str(num.unwrap().as_str())?;
-    return Ok(Some(converted));
+    return converted.ok();
 }
 
 fn run<T>(args: &Args) -> Result<(), Box<dyn Error>>
@@ -74,9 +81,9 @@ where
 {
     let processor = NativeProcessor::<T>::new(args.endianness);
 
-    let min = parse_num::<T>(args.min.clone())?;
-    let max = parse_num::<T>(args.max.clone())?;
-    let literal = parse_num(args.literal.clone())?;
+    let min = parse_num::<T>(args.min.clone());
+    let max = parse_num::<T>(args.max.clone());
+    let literal = parse_num(args.literal.clone());
 
     // TODO(danilan): unite all buffer size usages to a single place
     let entropy_producer = args.max_entropy.map(|_| {
@@ -130,10 +137,14 @@ fn run_type(data_type: DataType, args: &Args) -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    if let Err(error) = run_type(args.data_type.clone(), &args) {
-        eprintln!("Error: {error}");
-    }
+    return run_type(args.data_type.clone(), &args);
+}
+
+#[test]
+fn verify_cli() {
+    use clap::CommandFactory;
+    Args::command().debug_assert();
 }
