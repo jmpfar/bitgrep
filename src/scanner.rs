@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::fmt::Display;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::{error::Error, fs::File};
 
@@ -13,7 +14,7 @@ type EntropyProcessorRef<T> = Option<Rc<RefCell<dyn Processor<T>>>>;
 /// Scans a file for data types that match a filter
 /// T is the type to be scanned
 pub struct Scanner<'a, T> {
-    file_path: String,
+    file_path: PathBuf,
     filebuffer: FileBuffer<'a>,
 
     // TODO(danilan): Move to static dispatch
@@ -28,7 +29,7 @@ where
 {
     #[must_use]
     pub fn new(
-        file_path: &str,
+        file_path: &PathBuf,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
     ) -> Self {
@@ -38,7 +39,7 @@ where
     // TODO(danilan): Add a generic interface for handling different processors
     #[must_use]
     pub fn with_entropy_processor(
-        file_path: &str,
+        file_path: &PathBuf,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
         entropy_processor: EntropyProcessorRef<T>,
@@ -46,7 +47,7 @@ where
         let file = File::open(file_path).expect("File should be opened");
 
         return Self {
-            file_path: file_path.to_owned(),
+            file_path: file_path.clone(),
             filebuffer: FileBuffer::new(file),
             filter,
             processor,
@@ -79,7 +80,7 @@ where
             if self.filter.include_unwrap(result) {
                 println!(
                     "{}: [{cur_pos:#01X}] {}: {} [{}]",
-                    self.file_path,
+                    self.file_path.display(),
                     type_name,
                     result.unwrap(),
                     hex::encode_borrowed(data),

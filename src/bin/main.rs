@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::error::Error;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
 
@@ -18,7 +19,7 @@ use clap::Parser;
 struct Args {
     /// Files to search
     #[arg(short, long)]
-    file: String,
+    file: PathBuf,
 
     #[clap(long = "data-type", short = 'd')]
     data_type: DataType,
@@ -101,13 +102,13 @@ where
     // Unwrap option to coerce type, hell on earth
     let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
 
-    let mut grepper = Scanner::<T>::with_entropy_processor(
-        args.file.as_str(),
+    let mut scanner = Scanner::<T>::with_entropy_processor(
+        &args.file,
         Box::new(processor),
         filter,
         entropy_processor,
     );
-    grepper.scan()?;
+    scanner.scan()?;
 
     Ok(())
 }
