@@ -7,7 +7,7 @@ description= "Binary grep for numerical data types"
 repository = "https://github.com/jmpfar/bitgrep"
 license = "Apache-2.0"
 readme = "README.md"
-keywords = ["research", "binary", "forensics", "dfir", "grep"]
+keywords = ["research", "binary", "forensics", "dfir", "grep", "cybersecurity"]
 categories = ["command-line-utilities", "development-tools::debugging"]
 
 
