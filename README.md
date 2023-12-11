@@ -37,11 +37,18 @@ Float comparison is approximate with a [ULPS](https://en.wikipedia.org/wiki/Unit
 $ cargo run -- --data-type f64 --file data4.raw --literal 29.15385732 --endian big
 ```
 
+You can also filter by entropy to remove values that have a high chance of being noise. Entropy of >7.5 is usually compressed
+or encrypted data:
+
+```bash
+$ bitgrep --data-type i128 --file data.raw --literal 123 --max-entropy 7.5
+```
+
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
 
 ```bash
 $ find . -type f -exec /path/to/bitgrep \ 
-    --data-type i32 --file {} --max -78 --min -83 --endian little \;
+		--data-type i32 --file {} --max -78 --min -83 --endian little \;
 ```
 
 
@@ -53,7 +60,7 @@ Currently bitgrep supports all rust numeric data types (use with `--data-type`):
 | Rust | C                 |
 |------|-------------------|
 | i16  | short             |
-| i32  | long              |
+| i32  | int               |
 | i64  | long long         |
 | i128 | __int128 (GCC)    |
 | u16  | unsigned short    |
@@ -69,35 +76,38 @@ Currently bitgrep supports all rust numeric data types (use with `--data-type`):
 
 Feel free to send pull requests, hopefully I'll get to these before 2026
 
-1. Filter files by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
-2. Color output
-3. Hex dump output
-4. Literals search
-5. Hex search (e.g. `0AAD[33-4A]DF`)
-6. Exclude zeros and special valus (`NaN`, Infinty)
-7. Sane error messages
-8. Recursive file search / glob
-9. Date types
-    1. 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
-    2. Windows
-        1. FILETIME
-        2. SYSTEMTIME
-        3. OLE automation
-        4. CLR Time
-    3. Apple timestamps
-10. String Search
-    1. UTF-8
-    2. UTF-16
-    3. ASCII code pages
-    4. Search string representations of number range: e.g. "10.2" .. "10.722"
-    5. Regex
-11. Performance improvements
-    1. Convert to static dispatch
-12. Rule engine, see below
-13. Misc
-    1.  GUIDs
-    2.  IP addresses
-    3.  Custom structs
+1. [x] Filter files by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
+2. [ ] Add pipe support and other unix semantics
+3. [ ] Use stderr
+4. [ ] Color output
+5. [ ] Hex dump output
+6. [ ] Literals search
+7. [ ] Hex search (e.g. `0AAD[33-4A]DF`)
+8. [ ] Exclude zeros and special valus (`NaN`, Infinty)
+9. [ ] Sane error messages
+10. [ ] Recursive file search / glob
+11. [ ] Date types
+    1. [ ] 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
+    2. [ ] Windows
+       1. [ ] FILETIME
+       2. [ ] SYSTEMTIME
+       3. [ ] OLE automation
+       4. [ ] CLR Time
+    3. [ ] Apple timestamps
+12. [ ] String Search
+	 1. [ ] UTF-8
+	 2. [ ] UTF-16
+	 3. [ ] ASCII code pages
+	 4. [ ] Search string representations of number range: e.g. "10.2" .. "10.722"
+	 5. [ ] Regex
+13. [ ] Performance improvements
+	 1. [ ] Convert to static dispatch
+14. [ ] Rule engine, see below
+15. [ ] Misc
+    1. [ ] GUIDs
+    2. [ ] IP addresses
+    3. [ ] Custom structs
+    4. [ ] Refactor printing to different object/trait
 
 
 ### Rule engine
@@ -105,24 +115,24 @@ TODO: An imagined JSON of a rules file that can be used as a search configuratio
 
 ```json
 {
-  "filters": {
-    "file": {
-      "magic": "0xABDEF",
-      "types": [
-        {
-          "double": { "min": 80.3432, "max": 82.221112, "exclude-zero": true }
-        },
-        { "double": { "min": -32.865, "max": 31.53221, "exclude-zero": true } },
-        { "string": { "literal": "AMAzING" } },
-        { "string": { "regex": "12334+" } },
-        { "bytes": { "literal": "0xDEADBEEF" } },
-        { "integer": { "min": -10, "max": 12, "as_string": true } }
-      ],
-      "entropy": {
-        "max": 6
-      }
-    }
-  }
+	"filters": {
+		"file": {
+			"magic": "0xABDEF",
+			"types": [
+				{
+					"double": { "min": 80.3432, "max": 82.221112, "exclude-zero": true }
+				},
+				{ "double": { "min": -32.865, "max": 31.53221, "exclude-zero": true } },
+				{ "string": { "literal": "AMAzING" } },
+				{ "string": { "regex": "12334+" } },
+				{ "bytes": { "literal": "0xDEADBEEF" } },
+				{ "integer": { "min": -10, "max": 12, "as_string": true } }
+			],
+			"entropy": {
+				"max": 6
+			}
+		}
+	}
 }
 
 ```

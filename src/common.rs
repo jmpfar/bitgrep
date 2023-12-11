@@ -1,4 +1,6 @@
-#[derive(PartialEq, Debug, Clone, clap::ValueEnum)]
+pub const DEFAULT_BUFFER_SIZE: usize = 4096;
+
+#[derive(PartialEq, Debug, Clone, Copy, clap::ValueEnum)]
 pub enum Endianness {
     Little,
     Big,

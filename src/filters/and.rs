@@ -19,15 +19,19 @@ where
 
 impl<T> And<T> {
     #[must_use]
-    pub fn new() -> And<T> {
+    pub fn new() -> Self {
         return And {
             filters: Vec::new(),
         };
     }
 
     #[must_use]
-    pub fn with_filters(filters: Vec<BoxedFilter<T>>) -> And<T> {
+    pub fn with_filters(filters: Vec<BoxedFilter<T>>) -> Self {
         return And { filters };
+    }
+
+    pub fn with_box(filters: Vec<BoxedFilter<T>>) -> Box<Self> {
+        return Box::new(Self::with_filters(filters));
     }
 
     pub fn add(&mut self, filter: Box<dyn Filter<T>>) {
@@ -47,6 +51,8 @@ mod tests {
             return self.0 == result;
         }
     }
+
+    // TODO(danilan): Add short circuit test
 
     #[test]
     fn and_true_false_returns_false() {

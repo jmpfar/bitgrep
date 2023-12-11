@@ -1,3 +1,4 @@
+use crate::common::DEFAULT_BUFFER_SIZE;
 use std::cmp;
 use std::collections::{vec_deque, VecDeque};
 use std::io::{self, Read};
@@ -11,8 +12,6 @@ pub(crate) struct FileBuffer<'a> {
     buffer_size: usize,
     position: usize,
 }
-
-const DEFAULT_BUFFER_SIZE: usize = 4096;
 
 impl<'a> FileBuffer<'a> {
     pub fn new(reader: impl io::Read + 'a) -> Self {

@@ -1,11 +1,15 @@
+use std::cell::RefCell;
 use std::error::Error;
+use std::rc::Rc;
 use std::str::FromStr;
 
-use bitgrep::common::{DataType, Endianness};
-use bitgrep::filters::filter::{self};
+use bitgrep::common::{DataType, Endianness, DEFAULT_BUFFER_SIZE};
+use bitgrep::filters::configuration::{Configuration, EntropyConfig};
 use bitgrep::scanner::Scanner;
 use bitgrep::types::compare::Compare;
+use bitgrep::workers::entropy_processor::EntropyProcessor;
 use bitgrep::workers::native_processor::NativeProcessor;
+use bitgrep::workers::processors::Processor;
 use clap::Parser;
 
 /// Forensics grep.
@@ -40,8 +44,17 @@ struct Args {
     #[arg(long, short = 'l', allow_hyphen_values = true, conflicts_with_all= ["min", "max"])]
     literal: Option<String>,
 
+    #[arg(
+        long,
+        short = 'E',
+        allow_hyphen_values = true,
+        help = "Filters by maximum entropy. Entropy is calculated by the 4k preceeding the detected value.
+    An entropy over 7.5 is usually considered encrypted/random data."
+    )]
+    max_entropy: Option<f64>,
+
     #[clap(value_enum, long = "endian", short = 'e', default_value_t = Endianness::Little)]
-    endianess: Endianness,
+    endianness: Endianness,
 }
 
 fn parse_num<T: FromStr>(num: Option<String>) -> Result<Option<T>, <T as std::str::FromStr>::Err> {
@@ -53,65 +66,71 @@ fn parse_num<T: FromStr>(num: Option<String>) -> Result<Option<T>, <T as std::st
     return Ok(Some(converted));
 }
 
-fn run<T>(
-    file_path: &str,
-    min: Option<String>,
-    max: Option<String>,
-    literal: Option<String>,
-    endianness: Endianness,
-) -> Result<(), Box<dyn Error>>
+fn run<T>(args: &Args) -> Result<(), Box<dyn Error>>
 where
     T: Compare + 'static,
     <T as std::str::FromStr>::Err: std::error::Error,
 {
-    let processor = NativeProcessor::<T>::new(endianness);
+    let processor = NativeProcessor::<T>::new(args.endianness);
 
-    let min = parse_num::<T>(min)?;
-    let max = parse_num::<T>(max)?;
-    let literal = parse_num(literal)?;
+    let min = parse_num::<T>(args.min.clone())?;
+    let max = parse_num::<T>(args.max.clone())?;
+    let literal = parse_num(args.literal.clone())?;
 
-    let filter = filter::create_filters(min, max, literal);
+    // TODO(danilan): unite all buffer size usages to a single place
+    let entropy_producer = args.max_entropy.map(|_| {
+        Rc::new(RefCell::new(EntropyProcessor::<T>::new(
+            DEFAULT_BUFFER_SIZE,
+        )))
+    });
 
-    let mut grepper = Scanner::<T>::new(file_path, Box::new(processor), filter);
+    let entropy_config = args.max_entropy.map(|max| EntropyConfig {
+        max_entropy: max,
+        entropy_producer: entropy_producer.as_ref().unwrap().clone(),
+    });
+
+    let config = Configuration {
+        literal,
+        minimum: min,
+        maximum: max,
+        entropy: entropy_config,
+    };
+
+    let filter = config.create_filter().ok_or("Failed creating filters")?;
+
+    // Unwrap option to coerce type, hell on earth
+    let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
+
+    let mut grepper = Scanner::<T>::with_entropy_processor(
+        args.file.as_str(),
+        Box::new(processor),
+        filter,
+        entropy_processor,
+    );
     grepper.scan()?;
 
     Ok(())
 }
 
-fn run_type(
-    data_type: DataType,
-    file_path: &str,
-    min: Option<String>,
-    max: Option<String>,
-    literal: Option<String>,
-    endianness: Endianness,
-) -> Result<(), Box<dyn Error>> {
+fn run_type(data_type: DataType, args: &Args) -> Result<(), Box<dyn Error>> {
     match data_type {
-        DataType::I8 => run::<i8>(file_path, min, max, literal, endianness),
-        DataType::I16 => run::<i16>(file_path, min, max, literal, endianness),
-        DataType::I32 => run::<i32>(file_path, min, max, literal, endianness),
-        DataType::I64 => run::<i64>(file_path, min, max, literal, endianness),
-        DataType::I128 => run::<i128>(file_path, min, max, literal, endianness),
-        DataType::U8 => run::<u8>(file_path, min, max, literal, endianness),
-        DataType::U16 => run::<u16>(file_path, min, max, literal, endianness),
-        DataType::U32 => run::<u32>(file_path, min, max, literal, endianness),
-        DataType::U64 => run::<u64>(file_path, min, max, literal, endianness),
-        DataType::U128 => run::<u128>(file_path, min, max, literal, endianness),
-        DataType::F32 => run::<f32>(file_path, min, max, literal, endianness),
-        DataType::F64 => run::<f64>(file_path, min, max, literal, endianness),
+        DataType::I8 => run::<i8>(args),
+        DataType::I16 => run::<i16>(args),
+        DataType::I32 => run::<i32>(args),
+        DataType::I64 => run::<i64>(args),
+        DataType::I128 => run::<i128>(args),
+        DataType::U8 => run::<u8>(args),
+        DataType::U16 => run::<u16>(args),
+        DataType::U32 => run::<u32>(args),
+        DataType::U64 => run::<u64>(args),
+        DataType::U128 => run::<u128>(args),
+        DataType::F32 => run::<f32>(args),
+        DataType::F64 => run::<f64>(args),
     }
 }
 
 fn main() {
     let args = Args::parse();
 
-    run_type(
-        args.data_type,
-        args.file.as_str(),
-        args.min,
-        args.max,
-        args.literal,
-        args.endianess,
-    )
-    .expect("should succeed");
+    run_type(args.data_type.clone(), &args).expect("should succeed");
 }

@@ -1,7 +1,6 @@
-use bitgrep::common::Endianness;
-use bitgrep::filters::filter::create_filters;
 use bitgrep::scanner::Scanner;
 use bitgrep::workers::native_processor::NativeProcessor;
+use bitgrep::{common::Endianness, filters::configuration::Configuration};
 use std::path::Path;
 
 use criterion::{criterion_group, criterion_main, Criterion};
@@ -12,10 +11,15 @@ fn scanner_random_8k_minmax_benchmark(c: &mut Criterion) {
     let this_directory = Path::new(file!()).parent().unwrap();
     let path = this_directory.join(FILE_NAME);
 
-    let filter = create_filters(Some(30.1000), Some(32.12345), None);
+    let configuration = Configuration {
+        minimum: Some(30.1000),
+        maximum: Some(35.12345),
+        ..Default::default()
+    };
+    let filter = configuration.create_filter();
     let processor = NativeProcessor::new(Endianness::Little);
 
-    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter);
+    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter.unwrap());
 
     c.bench_function(
         format!("scanner.scan() minmax 8k random file [{FILE_NAME}]").as_str(),
@@ -31,10 +35,15 @@ fn scanner_random_8k_literal_benchmark(c: &mut Criterion) {
     let this_directory = Path::new(file!()).parent().unwrap();
     let path = this_directory.join(FILE_NAME);
 
-    let filter = create_filters(None, None, Some(30.178249837215606));
+    let configuration = Configuration {
+        literal: Some(33.248462071692536),
+        ..Default::default()
+    };
+    let filter = configuration.create_filter();
+
     let processor = NativeProcessor::new(Endianness::Little);
 
-    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter);
+    let mut scanner = Scanner::new(path.to_str().unwrap(), Box::new(processor), filter.unwrap());
 
     c.bench_function(
         format!("scanner.scan() literal 8k random file [{FILE_NAME}]").as_str(),
@@ -44,7 +53,9 @@ fn scanner_random_8k_literal_benchmark(c: &mut Criterion) {
     );
 }
 
-
-
-criterion_group!(benches, scanner_random_8k_minmax_benchmark, scanner_random_8k_literal_benchmark);
+criterion_group!(
+    benches,
+    scanner_random_8k_minmax_benchmark,
+    scanner_random_8k_literal_benchmark
+);
 criterion_main!(benches);
