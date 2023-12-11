@@ -15,10 +15,10 @@ fn numeric_equal<T: BitType>(first: &T, second: &T) -> bool {
 #[inline]
 fn float_equal<T>(first: &T, second: &T) -> bool
 where
-    T: Float
+    T: Float,
 {
     if first.is_nan() && second.is_nan() {
-        return true
+        return true;
     }
 
     if first.is_neg_infinity() && second.is_neg_infinity() {
@@ -224,5 +224,5 @@ mod tests {
         assert!(numeric_equal::<i32>(&-31, &-31));
         assert!(numeric_equal::<u8>(&40, &40));
         assert!(numeric_equal::<i64>(&0, &0));
-    }    
+    }
 }

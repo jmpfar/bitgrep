@@ -11,10 +11,10 @@ use bitgrep::types::compare::Compare;
 use bitgrep::workers::entropy_processor::EntropyProcessor;
 use bitgrep::workers::native_processor::NativeProcessor;
 use bitgrep::workers::processors::Processor;
-use clap::Parser;
-use clap::error::{ContextValue, ContextKind};
 use clap::error::ErrorKind::InvalidValue;
-use clap::{CommandFactory};
+use clap::error::{ContextKind, ContextValue};
+use clap::CommandFactory;
+use clap::Parser;
 
 /// Forensics grep.
 #[derive(Parser, Debug)]
@@ -66,9 +66,9 @@ fn parse_num<T: FromStr>(num: Option<String>) -> Option<T> {
 
     let converted = T::from_str(num.as_str());
     if converted.is_err() {
-            let mut err = Args::command().error(InvalidValue, "Failed parsing number");
-            err.insert(ContextKind::InvalidValue, ContextValue::String(num));
-            err.exit();
+        let mut err = Args::command().error(InvalidValue, "Failed parsing number");
+        err.insert(ContextKind::InvalidValue, ContextValue::String(num));
+        err.exit();
     }
 
     return converted.ok();

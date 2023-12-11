@@ -18,7 +18,6 @@ pub struct Configuration<T: Compare + 'static> {
 type BoxedFilter<T> = Box<dyn Filter<T>>;
 
 impl<T: Compare> Configuration<T> {
-
     #[allow(clippy::option_map_unit_fn)]
     pub fn create_filter(&self) -> Option<BoxedFilter<T>> {
         let mut filters: Vec<BoxedFilter<T>> = Vec::with_capacity(5);

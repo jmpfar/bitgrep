@@ -3,15 +3,14 @@ use crate::types::compare::Compare;
 
 /// Implements an equal filter.
 /// Includes elements that are equal to a literal.
-/// 
-/// In floats uses ULPS of 4 by default. 
+///
+/// In floats uses ULPS of 4 by default.
 /// See implementation in types/compare.rs
 pub(super) struct Equal<T> {
     literal: T,
 }
 
-impl<T: Compare> Filter<T> for Equal<T> 
-{
+impl<T: Compare> Filter<T> for Equal<T> {
     fn include(&self, result: T) -> bool {
         return result.equal(&self.literal);
     }
@@ -55,7 +54,6 @@ mod tests {
 
         assert!(Equal::<f32>::new(-0.0).include(0.0));
         assert!(Equal::<f64>::new(0.0).include(0.0));
-
     }
 
     #[test]
@@ -74,5 +72,4 @@ mod tests {
         assert!(Equal::<f64>::new(f64::INFINITY).include(f64::INFINITY));
         assert!(Equal::<f32>::new(f32::NEG_INFINITY).include(f32::NEG_INFINITY));
     }
-    
 }
