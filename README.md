@@ -6,39 +6,43 @@ Now you can!
 
 Useful for DFIR, security research and general debugging work, especially when you know what you're looking for but don't know where.
 
-## Usage
+## Install
 
-You can run the CLI binary through `cargo run`:
+Use `cargo install` to install the binary from crates.io:
 
 ```bash
-$ cargo run -- --data-type f64 --file data.raw -m 29.15 -M 36.0
+$ cargo install bitgrep
+$ bitgrep --data-type u32 --file data.raw -m 55 -M 144
 ```
 
-The above command finds all the doubles (`f64`) with values `29.15 <= x <= 36.0`.
-
-Alternatively, you can build a binary:
+Alternatively you can build a binary using the code from github:
 
 ```bash
 $ git clone https://github.com/jmpfar/bitgrep.git
 $ cd bitgrep
 $ cargo build --release
-```
-
-and then run the binary:
-
-```bash
 $ target/release/bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
 ```
+
+## Usage
+
+To find all all the doubles (`f64`) with values `29.15 <= x <= 36.0`:
+
+```bash
+$ bitgrep --data-type f64 --file data.raw -m 29.15 -M 36.0
+```
+
+The above command finds all the doubles (`f64`) with values `29.15 <= x <= 36.0`.
 
 In order to find a single literal value you can use the `--literal` or `-l` flag. 
 Float comparison is approximate with a [ULPS](https://en.wikipedia.org/wiki/Unit_in_the_last_place) of 4 (will be configurable in the future):
 
 ```bash
-$ cargo run -- --data-type f64 --file data4.raw --literal 29.15385732 --endian big
+$ bitgrep --data-type f64 --file data4.raw --literal 29.15385732 --endian big
 ```
 
-You can also filter by entropy to remove values that have a high chance of being noise. Entropy of >7.5 is usually compressed
-or encrypted data:
+You can also filter by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) to remove values that have a high chance of being noise.
+Entropy ranges between 0 and 8 where 8 is absolute random data. Entropy greater than 7.5 is usually encrypted or compressed, while between 3.5 and 5 is usually English text.
 
 ```bash
 $ bitgrep --data-type i128 --file data.raw --literal 123 --max-entropy 7.5
