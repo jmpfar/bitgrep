@@ -81,7 +81,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 3. [ ] Use stderr
 4. [ ] Color output
 5. [ ] Hex dump output
-6. [ ] Literals search
+6. [x] Literals search
 7. [ ] Hex search (e.g. `0AAD[33-4A]DF`)
 8. [ ] Exclude zeros and special valus (`NaN`, Infinty)
 9. [ ] Sane error messages
