@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::error::Error;
+use std::fs::File;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -109,8 +110,11 @@ where
     // Unwrap option to coerce type, hell on earth
     let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
 
+    let file = File::open(&args.file)?;
+
     let mut scanner = Scanner::<T>::with_entropy_processor(
-        &args.file,
+        args.file.clone(),
+        Box::new(file),
         Box::new(processor),
         filter,
         entropy_processor,

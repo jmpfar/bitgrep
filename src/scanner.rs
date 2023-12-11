@@ -1,8 +1,9 @@
 use std::cell::RefCell;
+use std::error::Error;
 use std::fmt::Display;
+use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::{error::Error, fs::File};
 
 use crate::filebuffer::FileBuffer;
 use crate::filters::filter::Filter;
@@ -29,25 +30,25 @@ where
 {
     #[must_use]
     pub fn new(
-        file_path: &PathBuf,
+        file_path: PathBuf,
+        file: Box<dyn io::Read + 'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
     ) -> Self {
-        return Self::with_entropy_processor(file_path, processor, filter, None);
+        return Self::with_entropy_processor(file_path, file, processor, filter, None);
     }
 
     // TODO(danilan): Add a generic interface for handling different processors
     #[must_use]
     pub fn with_entropy_processor(
-        file_path: &PathBuf,
+        file_path: PathBuf,
+        file: Box<dyn io::Read + 'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
         entropy_processor: EntropyProcessorRef<T>,
     ) -> Self {
-        let file = File::open(file_path).expect("File should be opened");
-
         return Self {
-            file_path: file_path.clone(),
+            file_path,
             filebuffer: FileBuffer::new(file),
             filter,
             processor,
@@ -99,8 +100,7 @@ where
 mod tests {
     use super::Scanner;
     use crate::{
-        common::Endianness, filebuffer::FileBuffer, filters::filter::Filter,
-        workers::native_processor::NativeProcessor,
+        common::Endianness, filters::filter::Filter, workers::native_processor::NativeProcessor,
     };
 
     struct TrueFilter;
@@ -117,30 +117,30 @@ mod tests {
     #[test]
     fn scan_buffer() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-        let mut double_grepper = Scanner::<f64> {
-            file_path: "ok".into(),
-            filter: Box::new(TrueFilter {}),
-            processor: Box::new(NativeProcessor::new(Endianness::Little)),
-            filebuffer: FileBuffer::new(buf.as_slice()),
-            entropy_processor: None,
-        };
 
-        let bytes_scanned = double_grepper.scan().expect("scan to complete successfuly");
+        let mut scanner = Scanner::new(
+            "ok".into(),
+            Box::new(buf.as_slice()),
+            Box::new(NativeProcessor::<f64>::new(Endianness::Little)),
+            Box::new(TrueFilter {}),
+        );
+
+        let bytes_scanned = scanner.scan().expect("scan to complete successfuly");
         assert_eq!(bytes_scanned, 3);
     }
 
     #[test]
     fn scan_buffer_big() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-        let mut double_grepper = Scanner::<i64> {
-            file_path: "ok".into(),
-            filter: Box::new(TrueFilter {}), // Empty filter
-            processor: Box::new(NativeProcessor::new(Endianness::Big)),
-            filebuffer: FileBuffer::new(buf.as_slice()),
-            entropy_processor: None,
-        };
 
-        let bytes_scanned = double_grepper.scan().expect("scan to complete successfuly");
+        let mut scanner = Scanner::new(
+            "ok".into(),
+            Box::new(buf.as_slice()),
+            Box::new(NativeProcessor::<i64>::new(Endianness::Big)),
+            Box::new(TrueFilter {}), // Empty filter
+        );
+
+        let bytes_scanned = scanner.scan().expect("scan to complete successfuly");
         assert_eq!(bytes_scanned, 3);
     }
 }

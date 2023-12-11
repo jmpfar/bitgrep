@@ -78,15 +78,16 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 
 1. [x] Filter files by [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
 2. [ ] Add pipe support and other unix semantics
-3. [ ] Use stderr
+3. [x] Use stderr
 4. [ ] Color output
 5. [ ] Hex dump output
 6. [x] Literals search
 7. [ ] Hex search (e.g. `0AAD[33-4A]DF`)
 8. [ ] Exclude zeros and special valus (`NaN`, Infinty)
 9. [ ] Sane error messages
-10. [ ] Recursive file search / glob
-11. [ ] Date types
+10. [ ] Binary releases
+11. [ ] Recursive file search / glob
+12. [ ] Date types
     1. [ ] 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
     2. [ ] Windows
        1. [ ] FILETIME
@@ -94,16 +95,16 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
        3. [ ] OLE automation
        4. [ ] CLR Time
     3. [ ] Apple timestamps
-12. [ ] String Search
+13. [ ] String Search
 	 1. [ ] UTF-8
 	 2. [ ] UTF-16
 	 3. [ ] ASCII code pages
 	 4. [ ] Search string representations of number range: e.g. "10.2" .. "10.722"
 	 5. [ ] Regex
-13. [ ] Performance improvements
+14. [ ] Performance improvements
 	 1. [ ] Convert to static dispatch
-14. [ ] Rule engine, see below
-15. [ ] Misc
+15. [ ] Rule engine, see below
+16. [ ] Misc
     1. [ ] GUIDs
     2. [ ] IP addresses
     3. [ ] Custom structs
