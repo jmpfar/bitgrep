@@ -18,14 +18,20 @@ use clap::error::{ContextKind, ContextValue};
 use clap::CommandFactory;
 use clap::Parser;
 
-/// Forensics grep.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+#[clap(group(
+    clap::ArgGroup::new("required-filters")
+        .required(true)
+        .multiple(true)
+        .args(&["min", "max", "literal"]),
+))]
 struct Args {
     /// Path to file, use - to read from stdin (must not be a tty)
     #[arg(short, long)]
     file: PathBuf,
 
+    /// Data type of value in rust numerical data types
     #[clap(long = "data-type", short = 'd')]
     data_type: DataType,
 
@@ -47,18 +53,26 @@ struct Args {
     )]
     max: Option<String>,
 
-    #[arg(long, short = 'l', allow_hyphen_values = true, conflicts_with_all= ["min", "max"])]
+    /// A specific value to match
+    #[arg(long,
+        short = 'l',
+        allow_hyphen_values = true,
+        conflicts_with_all= ["min", "max"],
+        long_help = "A specific value to match.
+In floating point datatypes, this uses a ULPS of 4 to detect floating point values which are approximately equal"
+)]
     literal: Option<String>,
 
+    /// Filters by maximum entropy
     #[arg(
         long,
-        short = 'E',
         allow_hyphen_values = true,
-        help = "Filters by maximum entropy. Entropy is calculated by the 4k preceeding the detected value.
-    An entropy over 7.5 is usually considered encrypted/random data."
+        long_help = "Filters by maximum entropy. Entropy is calculated by the 4k preceeding the detected value.
+An entropy over 7.5 is usually considered encrypted/random data."
     )]
     max_entropy: Option<f64>,
 
+    /// Endianness of searched value
     #[clap(value_enum, long = "endian", short = 'e', default_value_t = Endianness::Little)]
     endianness: Endianness,
 }
@@ -81,7 +95,7 @@ fn open_file<'a>(path: PathBuf) -> Result<SourceFile<'a>, Box<dyn Error>> {
         if io::stdin().is_terminal() {
             let err =
                 Args::command().error(InvalidValue, "using stdin is not supported in TTY mode");
-            err.print();
+            let _ignore = err.print();
             Args::command().print_help().unwrap();
             ::std::process::exit(2);
         }
