@@ -28,7 +28,7 @@ pub struct EntropyProcessor<T> {
 
 impl<T> Processor<T> for EntropyProcessor<T> {
     fn consume(&mut self, bytes: &[u8]) -> Option<T> {
-        // Some of our buffer might exceed the window size, the part the exceeds will be handled differently.
+        // Some of our buffer might exceed the window size, the part that exceeds will be handled differently.
         let mut leftover_size = (self.buffer.len() + bytes.len()).saturating_sub(self.window_size);
 
         // try to remove existing bytes to make space but don't exceed existing amount of elements.
@@ -125,8 +125,6 @@ impl<T> EntropyProcessor<T> {
 
 #[cfg(test)]
 mod tests {
-    use std::os::unix::process;
-
     use super::*;
 
     #[test]

@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::Display;
-use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -69,8 +68,9 @@ where
 
             let result = self.processor.consume(data);
 
+            // TODO(danilan): Need to improve here, cause it doesn't make sense to scan byte by byte
             if let Some(entropy_processor) = &self.entropy_processor {
-                entropy_processor.borrow_mut().consume(data);
+                entropy_processor.borrow_mut().consume(&data[..1]);
             }
 
             if result.is_none() {
