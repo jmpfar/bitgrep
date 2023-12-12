@@ -27,10 +27,17 @@ path = "src/lib.rs"
 name = "bitgrep"
 path = "src/bin/main.rs"
 
-
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
 
 [[bench]]
 name = "scanner_bench"
 harness = false
+
+[lints.clippy]
+# Enable pedantic mode
+pedantic = "warn"
+
+# Exclude lints we don't like
+needless_return = "allow"
+approx_constant = "allow"
