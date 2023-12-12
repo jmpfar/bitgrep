@@ -3,10 +3,12 @@ use std::str::FromStr;
 
 use super::endian::{FromBigEndian, FromLittleEndian};
 
+// TODO(danilan): Migrate from own implementations to num crate float/num/int types
+
 /// A general marker trait that represents a type that bitgrep supports.
 /// Used as part of the generics black magic
 pub trait BitType:
-    FromStr + Copy + PartialOrd + Display + FromLittleEndian + FromBigEndian
+    num::Num + FromStr + Copy + PartialOrd + Display + FromLittleEndian + FromBigEndian
 {
 }
 

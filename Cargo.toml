@@ -16,6 +16,7 @@ categories = ["command-line-utilities", "development-tools::debugging"]
 [dependencies]
 approx = "0.5.1"
 clap = { version = "4.4.8", features = ["derive"] }
+num = "0.4.1"
 thiserror = "1.0.50"
 
 [lib]

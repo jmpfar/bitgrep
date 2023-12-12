@@ -5,13 +5,18 @@ use crate::{
     workers::entropy_processor::EntropyProducer,
 };
 
-use super::{and::And, entropy::Entropy, equal::Equal, filter::Filter, max::Max, min::Min};
+use super::{
+    and::And, entropy::Entropy, equal::Equal, filter::Filter, max::Max, min::Min,
+    notequal_exact::NotEqualExact, notequal::NotEqual,
+};
 
 #[derive(Default)]
 pub struct Configuration<T: Compare + 'static> {
     pub minimum: Option<T>,
     pub maximum: Option<T>,
     pub literal: Option<T>,
+    pub exclude_zero: bool,
+    pub exclude_literal: Option<T>,
     pub entropy: Option<EntropyConfig>,
 }
 
@@ -25,6 +30,8 @@ impl<T: Compare> Configuration<T> {
         self.create_equal_filter().map(|f| filters.push(f));
         self.create_max_filter().map(|f| filters.push(f));
         self.create_min_filter().map(|f| filters.push(f));
+        self.create_exclude_zero_filter().map(|f| filters.push(f));
+        self.create_exclude_literal_filter().map(|f| filters.push(f));
 
         self.entropy
             .as_ref()
@@ -61,6 +68,22 @@ impl<T: Compare> Configuration<T> {
 
         return None;
     }
+
+    fn create_exclude_zero_filter(&self) -> Option<BoxedFilter<T>> {
+        if self.exclude_zero {
+            return Some(NotEqualExact::with_box(T::zero()));
+        }
+
+        return None;
+    }
+
+    fn create_exclude_literal_filter(&self) -> Option<BoxedFilter<T>> {
+        if let Some(literal) = self.exclude_literal {
+            return Some(NotEqual::with_box(literal));
+        }
+
+        return None;
+    }    
 }
 
 pub struct EntropyConfig {

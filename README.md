@@ -64,6 +64,18 @@ You can use a pipe with the special `-` file path:
 $ cat data.raw | bitgrep --data-type u8 --file - --literal 3
 ```
 
+To reduce noise in binary files that contain zero bytes, you can use `--exclude-zero`. This excludes all absolute zero values (`0x0`)
+
+```console
+$ bitgrep --data-type i32 --file data.raw --min -30 --max 30 --exclude-zero
+```
+
+The above command does not filter values that are approximately close to zero (e.g. `0.00000000000000001`). This might be useful when reducing noise in floating point searches. Alternatively use:
+
+```console
+$ bitgrep --data-type f64 --file data.raw --min -30.0 --max 30.0 --exclude-literal 0.0
+```
+
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
 
 ```console
@@ -103,11 +115,13 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 5. [ ] Hex dump output
 6. [x] Literals search
 7. [ ] Hex search (e.g. `0AAD[33-4A]DF`)
-8. [ ] Exclude zeros and special valus (`NaN`, Infinty)
-9. [ ] Sane error messages
-10. [ ] Binary releases
-11. [ ] Recursive file search / glob
-12. [ ] Date types
+8. [x] Exclude zeros
+9. [x] Exclude approximate literal values
+10. [ ] Sane error messages
+11. [ ] Exclude extreme exponent values
+12. [ ] Binary releases
+13. [ ] Recursive file search / glob
+14. [ ] Date types
     1. [ ] 32-bit/64-bit Unix epoch (milliseconds, microseconds, seconds)
     2. [ ] Windows
        1. [ ] FILETIME
@@ -115,20 +129,22 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
        3. [ ] OLE automation
        4. [ ] CLR Time
     3. [ ] Apple timestamps
-13. [ ] String Search
+15. [ ] String Search
     1. [ ] UTF-8
     2. [ ] UTF-16
     3. [ ] ASCII code pages
     4. [ ] Search string representations of number range: e.g. "10.2" .. "10.722"
     5. [ ] Regex
-14. [ ] Performance improvements
+16. [ ] Performance improvements
     1. [ ] Convert to static dispatch
-15. [ ] Rule engine, see below
-16. [ ] Misc
+17. [ ] Rule engine, see below
+18. [ ] Misc
     1. [ ] GUIDs
     2. [ ] IP addresses
     3. [ ] Custom structs
-    4. [ ] Refactor printing to different object/trait
+19. [ ] Debt
+    1. [ ] Refactor printing to different object/trait
+    2. [ ] Add integration tests
 
 ### Rule engine
 

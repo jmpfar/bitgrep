@@ -72,6 +72,21 @@ An entropy over 7.5 is usually considered encrypted/random data."
     )]
     max_entropy: Option<f64>,
 
+    /// Exclude absolute zero values (0x0)
+    #[arg(long,
+        long_help = "Filters abolute zero values. Binary files often contain many zero values which can add noise.
+Currently this only filters absolute values (i.e. 0x0), no approximation for floats."
+    )]
+    exclude_zero: bool,
+
+    /// Exclude an approximate literal value
+    #[arg(long,
+        allow_hyphen_values = true,
+        long_help = "A specific value to exclude.
+In floating point datatypes, this uses a ULPS of 4 to detect floating point values which are approximately equal"
+)]
+    exclude_literal: Option<String>,
+
     /// Endianness of searched value
     #[clap(value_enum, long = "endian", short = 'e', default_value_t = Endianness::Little)]
     endianness: Endianness,
@@ -117,6 +132,7 @@ where
     let min = parse_num::<T>(args.min.clone());
     let max = parse_num::<T>(args.max.clone());
     let literal = parse_num(args.literal.clone());
+    let exclude_literal = parse_num::<T>(args.exclude_literal.clone());
 
     // TODO(danilan): unite all buffer size usages to a single place
     let entropy_producer = args.max_entropy.map(|_| {
@@ -135,6 +151,8 @@ where
         minimum: min,
         maximum: max,
         entropy: entropy_config,
+        exclude_zero: args.exclude_zero,
+        exclude_literal,
     };
 
     let filter = config.create_filter().ok_or("Failed creating filters")?;
