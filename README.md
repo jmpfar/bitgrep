@@ -47,7 +47,8 @@ In order to find a single literal value you can use the `--literal` or `-l` flag
 Float comparison is approximate with a [ULPS](https://en.wikipedia.org/wiki/Unit_in_the_last_place) of 4 (will be configurable in the future):
 
 ```console
-$ bitgrep --data-type f64 --file data4.raw --literal 29.15385732 --endian big
+$ bitgrep --data-type f64 --file data4.raw --literal 29.15385732 \
+    --endian big
 ```
 
 You can also filter by [entropy](<https://en.wikipedia.org/wiki/Entropy_(information_theory)>) to remove values that have a high chance of being noise.
@@ -55,7 +56,8 @@ You can also filter by [entropy](<https://en.wikipedia.org/wiki/Entropy_(informa
 Entropy ranges between 0 and 8 where 8 represents random data. Entropy greater than 7.5 is usually encrypted, compressed or random. English text has a value of between 3.5 and 5.
 
 ```console
-$ bitgrep --data-type i128 --file data.raw --literal 123 --max-entropy 7.5
+$ bitgrep --data-type i128 --file data.raw --literal 123 \
+    --max-entropy 7.5
 ```
 
 You can use a pipe with the special `-` file path:
@@ -67,13 +69,15 @@ $ cat data.raw | bitgrep --data-type u8 --file - --literal 3
 To reduce noise in binary files that contain zero bytes, you can use `--exclude-zero`. This excludes all absolute zero values (`0x0`)
 
 ```console
-$ bitgrep --data-type i32 --file data.raw --min -30 --max 30 --exclude-zero
+$ bitgrep --data-type i32 --file data.raw --min -30 --max 30 \
+    --exclude-zero
 ```
 
 The above command does not filter values that are approximately close to zero (e.g. `0.00000000000000001`). This might be useful when reducing noise in floating point searches. Alternatively use:
 
 ```console
-$ bitgrep --data-type f64 --file data.raw --min -30.0 --max 30.0 --exclude-literal 0.0
+$ bitgrep --data-type f64 --file data.raw --min -30.0 --max 30.0 \
+    --exclude-literal 0.0
 ```
 
 Currently there is no native support for directory globbing or recursion, if you need to search multiple files you can use the `find` command:
