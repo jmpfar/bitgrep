@@ -141,6 +141,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
     5. [ ] Regex
 16. [ ] Performance improvements
     1. [ ] Convert to static dispatch
+    2. [ ] Search without converting bytes to number
 17. [ ] Rule engine, see below
 18. [ ] Misc
     1. [ ] GUIDs
