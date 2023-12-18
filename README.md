@@ -149,8 +149,9 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
     2. [ ] IP addresses
     3. [ ] Custom structs
 19. [ ] Debt
-    1. [ ] Refactor printing to different object/trait
+    1. [x] Refactor printing to different object/trait
     2. [ ] Add integration tests
+    3. [ ] Create configuration => scanner builder
 
 ### Rule engine
 

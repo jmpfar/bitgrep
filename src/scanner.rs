@@ -7,16 +7,23 @@ use std::rc::Rc;
 use crate::common::SourceFile;
 use crate::filebuffer::FileBuffer;
 use crate::filters::filter::Filter;
-use crate::hex;
+use crate::printers::output::{DataContext, Output, Stringifier};
+use crate::printers::printer::Printer;
+use crate::printers::simple_printer::SimplePrinter;
 use crate::workers::processors::Processor;
 
 type EntropyProcessorRef<T> = Option<Rc<RefCell<dyn Processor<T>>>>;
 
 /// Scans a file for data types that match a filter
 /// T is the type to be scanned
-pub struct Scanner<'a, T> {
+pub struct Scanner<'a, T, S>
+where
+    T: Display + Copy,
+    S: Stringifier<T>,
+{
     file_path: PathBuf,
     filebuffer: FileBuffer<'a>,
+    printer: SimplePrinter<T, S>,
 
     // TODO(danilan): Move to static dispatch
     filter: Box<dyn Filter<T>>,
@@ -24,17 +31,19 @@ pub struct Scanner<'a, T> {
     entropy_processor: EntropyProcessorRef<T>,
 }
 
-impl<'a, T> Scanner<'a, T>
+impl<'a, T, S> Scanner<'a, T, S>
 where
     T: Display + Copy,
+    S: Stringifier<T>,
 {
     #[must_use]
     pub fn new(
         file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
+        printer: SimplePrinter<T, S>,
     ) -> Self {
-        return Self::with_entropy_processor(file, processor, filter, None);
+        return Self::with_entropy_processor(file, processor, filter, printer, None);
     }
 
     // TODO(danilan): Add a generic interface for handling different processors
@@ -43,19 +52,22 @@ where
         file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
+        printer: SimplePrinter<T, S>,
         entropy_processor: EntropyProcessorRef<T>,
     ) -> Self {
         return Self {
             file_path: file.path(),
             filebuffer: FileBuffer::new(file.file()),
+            printer,
             filter,
             processor,
             entropy_processor,
         };
     }
 
-    pub fn scan(&mut self) -> Result<usize, Box<dyn Error>> {
+    pub fn scan(mut self) -> Result<usize, Box<dyn Error>> {
         let position = self.scan_buffer()?;
+        self.printer.end();
         Ok(position)
     }
 
@@ -78,13 +90,13 @@ where
             }
 
             if self.filter.include_unwrap(result) {
-                println!(
-                    "{}: [{cur_pos:#01X}] {}: {} [{}]",
-                    self.file_path.display(),
-                    type_name,
+                let output = Output::new(
+                    &self.file_path,
                     result.unwrap(),
-                    hex::encode_borrowed(data),
+                    type_name.into(),
+                    DataContext::new(data, cur_pos),
                 );
+                self.printer.feed(output);
             }
 
             // move carret to the next byte
@@ -101,6 +113,7 @@ mod tests {
     use crate::{
         common::{Endianness, SourceFile},
         filters::filter::Filter,
+        printers::{output::SimpleOutput, simple_printer::SimplePrinter},
         workers::native_processor::NativeProcessor,
     };
 
@@ -125,6 +138,7 @@ mod tests {
             file,
             Box::new(NativeProcessor::<f64>::new(Endianness::Little)),
             Box::new(TrueFilter {}),
+            SimplePrinter::new(SimpleOutput::new()),
         );
 
         let bytes_scanned = scanner.scan().expect("scan to complete successfuly");
@@ -141,6 +155,7 @@ mod tests {
             file,
             Box::new(NativeProcessor::<i64>::new(Endianness::Big)),
             Box::new(TrueFilter {}), // Empty filter
+            SimplePrinter::new(SimpleOutput::new()),
         );
 
         let bytes_scanned = scanner.scan().expect("scan to complete successfuly");

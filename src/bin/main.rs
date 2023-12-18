@@ -8,6 +8,8 @@ use std::str::FromStr;
 
 use bitgrep::common::{DataType, Endianness, SourceFile, DEFAULT_BUFFER_SIZE};
 use bitgrep::filters::configuration::{Configuration, EntropyConfig};
+use bitgrep::printers::output::SimpleOutput;
+use bitgrep::printers::simple_printer::SimplePrinter;
 use bitgrep::scanner::Scanner;
 use bitgrep::types::compare::Compare;
 use bitgrep::workers::entropy_processor::EntropyProcessor;
@@ -161,11 +163,17 @@ where
 
     // Unwrap option to coerce type, hell on earth
     let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
+    let printer = SimplePrinter::new(SimpleOutput::new());
 
     let file = open_file(args.file.clone())?;
 
-    let mut scanner =
-        Scanner::<T>::with_entropy_processor(file, Box::new(processor), filter, entropy_processor);
+    let mut scanner = Scanner::with_entropy_processor(
+        file,
+        Box::new(processor),
+        filter,
+        printer,
+        entropy_processor,
+    );
     scanner.scan()?;
 
     Ok(())

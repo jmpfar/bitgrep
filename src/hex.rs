@@ -29,9 +29,12 @@ pub fn decode(s: &str) -> Result<Vec<u8>, DecodeHexError> {
     return Ok(result?);
 }
 
-pub fn encode(bytes: Vec<u8>) -> String {
+pub fn encode<T>(bytes: T) -> String
+where
+    T: AsRef<[u8]>,
+{
     let mut result = String::new();
-    for byte in bytes {
+    for byte in bytes.as_ref() {
         write!(&mut result, "{byte:x}").expect("should write to string");
     }
 
