@@ -55,7 +55,7 @@ mod tests {
         assert!(NotEqual::<f32>::new(-0.0).include(0.00001));
         assert!(NotEqual::<f64>::new(0.0).include(0.00001));
         assert!(NotEqual::<f64>::new(f64::INFINITY).include(f64::NEG_INFINITY));
-        assert!(NotEqual::<f32>::new(f32::NEG_INFINITY).include(f32::INFINITY));        
+        assert!(NotEqual::<f32>::new(f32::NEG_INFINITY).include(f32::INFINITY));
     }
 
     #[test]

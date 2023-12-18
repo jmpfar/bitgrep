@@ -73,18 +73,20 @@ An entropy over 7.5 is usually considered encrypted/random data."
     max_entropy: Option<f64>,
 
     /// Exclude absolute zero values (0x0)
-    #[arg(long,
+    #[arg(
+        long,
         long_help = "Filters abolute zero values. Binary files often contain many zero values which can add noise.
 Currently this only filters absolute values (i.e. 0x0), no approximation for floats."
     )]
     exclude_zero: bool,
 
     /// Exclude an approximate literal value
-    #[arg(long,
+    #[arg(
+        long,
         allow_hyphen_values = true,
         long_help = "A specific value to exclude.
 In floating point datatypes, this uses a ULPS of 4 to detect floating point values which are approximately equal"
-)]
+    )]
     exclude_literal: Option<String>,
 
     /// Endianness of searched value

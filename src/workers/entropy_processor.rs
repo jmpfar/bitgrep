@@ -57,7 +57,6 @@ pub trait EntropyProducer {
 }
 
 impl<T> EntropyProducer for EntropyProcessor<T> {
-
     #[allow(clippy::cast_precision_loss)]
     fn entropy(&self) -> Option<f64> {
         if self.buffer.len() < self.minimum_consumed_bytes {

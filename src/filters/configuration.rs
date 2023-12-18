@@ -7,7 +7,7 @@ use crate::{
 
 use super::{
     and::And, entropy::Entropy, equal::Equal, filter::Filter, max::Max, min::Min,
-    notequal_exact::NotEqualExact, notequal::NotEqual,
+    notequal::NotEqual, notequal_exact::NotEqualExact,
 };
 
 #[derive(Default)]
@@ -31,7 +31,8 @@ impl<T: Compare> Configuration<T> {
         self.create_max_filter().map(|f| filters.push(f));
         self.create_min_filter().map(|f| filters.push(f));
         self.create_exclude_zero_filter().map(|f| filters.push(f));
-        self.create_exclude_literal_filter().map(|f| filters.push(f));
+        self.create_exclude_literal_filter()
+            .map(|f| filters.push(f));
 
         self.entropy
             .as_ref()
@@ -83,7 +84,7 @@ impl<T: Compare> Configuration<T> {
         }
 
         return None;
-    }    
+    }
 }
 
 pub struct EntropyConfig {
