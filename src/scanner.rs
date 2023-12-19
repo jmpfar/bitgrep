@@ -116,7 +116,7 @@ where
 mod tests {
     use std::{error::Error, fmt::Display, path::Path, vec};
 
-    use assertor::{assert_that, VecAssertion};
+    use assertor::{assert_that, BooleanAssertion, VecAssertion};
 
     use super::Scanner;
     use crate::{
@@ -210,7 +210,7 @@ mod tests {
             ),
         ];
         assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
-        assert_that!(scanner.printer.finished);
+        assert_that!(scanner.printer.finished).is_true();
     }
 
     #[test]
@@ -250,6 +250,6 @@ mod tests {
         ];
 
         assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
-        assert_that!(scanner.printer.finished);
+        assert_that!(scanner.printer.finished).is_true();
     }
 }

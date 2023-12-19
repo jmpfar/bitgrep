@@ -43,7 +43,9 @@ where
     W: Write,
 {
     fn drop(&mut self) {
-        debug_assert!(self.finished, "Must call end() when finishing printing");
+        if !cfg!(test) {
+            debug_assert!(self.finished, "Must call end() when finishing printing");
+        }
     }
 }
 
@@ -60,5 +62,43 @@ where
             io_writer,
             phantom: PhantomData,
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use assertor::{assert_that, VecAssertion};
+
+    use crate::printers::{
+        output::{self, Output, Stringifier},
+        printer::Printer,
+    };
+
+    use super::SimplePrinter;
+
+    struct FakeStringifier {}
+
+    impl Stringifier<i32> for FakeStringifier {
+        fn stringify(&self, output: Output<i32>) -> String {
+            return "OK!".into();
+        }
+    }
+
+    #[test]
+    fn printer_feed_expects_lines_written() {
+        let vec = vec![];
+        let first_string = "OK!\n".as_bytes();
+
+        let mut expected_vec: Vec<u8> = vec![];
+        expected_vec.extend(first_string);
+        expected_vec.extend(first_string);
+
+        let mut printer = SimplePrinter::new(FakeStringifier {}, vec);
+
+        printer.feed(Output::default()).unwrap();
+        printer.feed(Output::default()).unwrap();
+
+        assert_that!(printer.io_writer).contains_exactly_in_order(expected_vec);
     }
 }

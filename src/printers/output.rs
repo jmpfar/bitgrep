@@ -9,7 +9,7 @@ pub(crate) enum Content {
     Context,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct Output<T>
 where
     T: Display,
@@ -34,7 +34,7 @@ where
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct DataContext {
     data: Vec<u8>,
     offset: usize,
