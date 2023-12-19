@@ -72,7 +72,7 @@ where
     /// consume self so can be used for testing.
     fn scan_file(&mut self) -> Result<usize, Box<dyn Error>> {
         let position = self.scan_buffer()?;
-        self.printer.end();
+        self.printer.end()?;
         Ok(position)
     }
 
@@ -101,7 +101,7 @@ where
                     type_name.into(),
                     DataContext::new(data.to_vec(), cur_pos),
                 );
-                self.printer.feed(output);
+                self.printer.feed(output)?;
             }
 
             // move carret to the next byte
@@ -114,7 +114,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Display, path::Path, vec};
+    use std::{error::Error, fmt::Display, path::Path, vec};
 
     use assertor::{assert_that, VecAssertion};
 
@@ -161,12 +161,14 @@ mod tests {
     where
         T: Display + Clone,
     {
-        fn feed(&mut self, output: Output<T>) {
+        fn feed(&mut self, output: Output<T>) -> Result<(), Box<(dyn Error)>> {
             self.outputs.push(output);
+            Ok(())
         }
 
-        fn end(&mut self) {
+        fn end(&mut self) -> Result<(), Box<(dyn Error)>> {
             self.finished = true;
+            Ok(())
         }
     }
 

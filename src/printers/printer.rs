@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{error::Error, fmt::Display};
 
 use super::output::Output;
 
@@ -8,9 +8,9 @@ where
     T: Display,
 {
     /// Feed a result to print
-    fn feed(&mut self, output: Output<T>);
+    fn feed(&mut self, output: Output<T>) -> Result<(), Box<dyn Error>>;
 
     /// Call when ending all processing, this allows
     /// printers to print a footer or flush buffered output.
-    fn end(&mut self);
+    fn end(&mut self) -> Result<(), Box<dyn Error>>;
 }

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::error::Error;
 use std::fs::File;
-use std::io::{self, stdin, IsTerminal};
+use std::io::{self, stdin, BufWriter, IsTerminal};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -163,7 +163,10 @@ where
 
     // Unwrap option to coerce type, hell on earth
     let entropy_processor = entropy_producer.map(|rc| rc as Rc<RefCell<dyn Processor<T>>>);
-    let printer = SimplePrinter::new(SimpleOutput::new());
+
+    let stdout = std::io::stdout().lock();
+    let stdout = BufWriter::new(stdout);
+    let printer = SimplePrinter::new(SimpleOutput::new(), stdout);
 
     let file = open_file(args.file.clone())?;
 

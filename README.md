@@ -142,7 +142,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
 16. [ ] Performance improvements
     1. [ ] Convert to static dispatch
     2. [ ] Search without converting bytes to number
-    3. [ ] Lock and buffer stdout
+    3. [x] Lock and buffer stdout
 17. [ ] Rule engine, see below
 18. [ ] Misc
     1. [ ] GUIDs
@@ -152,6 +152,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
     1. [x] Refactor printing to different object/trait
     2. [ ] Add integration tests
     3. [ ] Create configuration => scanner builder
+    4. [ ] Filters to enums
 
 ### Rule engine
 
