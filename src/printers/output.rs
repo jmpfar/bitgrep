@@ -65,19 +65,13 @@ impl DataContext {
 }
 
 // TODO(danilan): Consider moving to newtypes implementing display
-
+#[derive(Default)]
 pub struct SimpleOutput {}
 
 impl SimpleOutput {
     #[must_use]
     pub fn new() -> Self {
         return Self::default();
-    }
-}
-
-impl Default for SimpleOutput {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

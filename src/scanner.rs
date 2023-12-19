@@ -7,9 +7,8 @@ use std::rc::Rc;
 use crate::common::SourceFile;
 use crate::filebuffer::FileBuffer;
 use crate::filters::filter::Filter;
-use crate::printers::output::{DataContext, Output, Stringifier};
+use crate::printers::output::{DataContext, Output};
 use crate::printers::printer::Printer;
-use crate::printers::simple_printer::SimplePrinter;
 use crate::workers::processors::Processor;
 
 type EntropyProcessorRef<T> = Option<Rc<RefCell<dyn Processor<T>>>>;
@@ -115,7 +114,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Display, path::Path, rc::Rc, vec};
+    use std::{fmt::Display, path::Path, vec};
 
     use assertor::{assert_that, VecAssertion};
 
@@ -124,9 +123,8 @@ mod tests {
         common::{Endianness, SourceFile},
         filters::filter::Filter,
         printers::{
-            output::{DataContext, Output, SimpleOutput},
+            output::{DataContext, Output},
             printer::Printer,
-            simple_printer::SimplePrinter,
         },
         workers::native_processor::NativeProcessor,
     };
@@ -210,6 +208,7 @@ mod tests {
             ),
         ];
         assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
+        assert_that!(scanner.printer.finished);
     }
 
     #[test]
@@ -249,5 +248,6 @@ mod tests {
         ];
 
         assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
+        assert_that!(scanner.printer.finished);
     }
 }
