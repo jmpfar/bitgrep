@@ -9,15 +9,22 @@ pub(crate) enum Content {
     Context,
 }
 
-pub(crate) struct Output<'a, T: Display> {
+#[derive(Debug, PartialEq)]
+pub struct Output<T>
+where
+    T: Display,
+{
     file_path: PathBuf,
     value_type: String, // Enum?
     value: T,           // Remove T and convert on own?
-    data_context: DataContext<'a>,
+    data_context: DataContext,
 }
 
-impl<'a, T: Display> Output<'a, T> {
-    pub fn new(path: &Path, value: T, value_type: String, data_context: DataContext<'a>) -> Self {
+impl<T> Output<T>
+where
+    T: Display,
+{
+    pub fn new(path: &Path, value: T, value_type: String, data_context: DataContext) -> Self {
         return Self {
             file_path: path.to_owned(),
             value,
@@ -27,8 +34,9 @@ impl<'a, T: Display> Output<'a, T> {
     }
 }
 
-pub(crate) struct DataContext<'a> {
-    data: &'a [u8],
+#[derive(Debug, PartialEq)]
+pub struct DataContext {
+    data: Vec<u8>,
     offset: usize,
 
     /// zero index of value in data
@@ -37,13 +45,14 @@ pub(crate) struct DataContext<'a> {
     value_size: usize,
 }
 
-impl<'a> DataContext<'a> {
-    pub fn new(data: &'a [u8], offset: usize) -> Self {
+impl DataContext {
+    pub fn new(data: Vec<u8>, offset: usize) -> Self {
+        let size = data.len();
         return DataContext {
             data,
             offset,
             value_index: 0,
-            value_size: data.len(),
+            value_size: size,
         };
     }
 
@@ -60,8 +69,15 @@ impl<'a> DataContext<'a> {
 pub struct SimpleOutput {}
 
 impl SimpleOutput {
+    #[must_use]
     pub fn new() -> Self {
-        return SimpleOutput {};
+        return Self::default();
+    }
+}
+
+impl Default for SimpleOutput {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

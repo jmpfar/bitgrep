@@ -18,7 +18,7 @@ where
     T: Display,
     S: Stringifier<T>,
 {
-    fn feed(&self, output: Output<T>) {
+    fn feed(&mut self, output: Output<T>) {
         println!("{}", self.stringifier.stringify(output));
     }
 

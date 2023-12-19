@@ -40,12 +40,3 @@ where
 
     return result;
 }
-
-pub fn encode_borrowed(bytes: &[u8]) -> String {
-    let mut result = String::new();
-    for byte in bytes {
-        write!(&mut result, "{byte:x}").expect("should write to string");
-    }
-
-    return result;
-}

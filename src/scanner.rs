@@ -16,14 +16,14 @@ type EntropyProcessorRef<T> = Option<Rc<RefCell<dyn Processor<T>>>>;
 
 /// Scans a file for data types that match a filter
 /// T is the type to be scanned
-pub struct Scanner<'a, T, S>
+pub struct Scanner<'a, T, P>
 where
     T: Display + Copy,
-    S: Stringifier<T>,
+    P: Printer<T>,
 {
     file_path: PathBuf,
     filebuffer: FileBuffer<'a>,
-    printer: SimplePrinter<T, S>,
+    printer: P,
 
     // TODO(danilan): Move to static dispatch
     filter: Box<dyn Filter<T>>,
@@ -31,17 +31,17 @@ where
     entropy_processor: EntropyProcessorRef<T>,
 }
 
-impl<'a, T, S> Scanner<'a, T, S>
+impl<'a, T, P> Scanner<'a, T, P>
 where
     T: Display + Copy,
-    S: Stringifier<T>,
+    P: Printer<T>,
 {
     #[must_use]
     pub fn new(
         file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
-        printer: SimplePrinter<T, S>,
+        printer: P,
     ) -> Self {
         return Self::with_entropy_processor(file, processor, filter, printer, None);
     }
@@ -52,7 +52,7 @@ where
         file: SourceFile<'a>,
         processor: Box<dyn Processor<T>>,
         filter: Box<dyn Filter<T>>,
-        printer: SimplePrinter<T, S>,
+        printer: P,
         entropy_processor: EntropyProcessorRef<T>,
     ) -> Self {
         return Self {
@@ -66,6 +66,12 @@ where
     }
 
     pub fn scan(mut self) -> Result<usize, Box<dyn Error>> {
+        return self.scan_file();
+    }
+
+    /// Wrapper method that calls printer.end(), also does not
+    /// consume self so can be used for testing.
+    fn scan_file(&mut self) -> Result<usize, Box<dyn Error>> {
         let position = self.scan_buffer()?;
         self.printer.end();
         Ok(position)
@@ -94,7 +100,7 @@ where
                     &self.file_path,
                     result.unwrap(),
                     type_name.into(),
-                    DataContext::new(data, cur_pos),
+                    DataContext::new(data.to_vec(), cur_pos),
                 );
                 self.printer.feed(output);
             }
@@ -109,11 +115,19 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::{fmt::Display, path::Path, rc::Rc, vec};
+
+    use assertor::{assert_that, VecAssertion};
+
     use super::Scanner;
     use crate::{
         common::{Endianness, SourceFile},
         filters::filter::Filter,
-        printers::{output::SimpleOutput, simple_printer::SimplePrinter},
+        printers::{
+            output::{DataContext, Output, SimpleOutput},
+            printer::Printer,
+            simple_printer::SimplePrinter,
+        },
         workers::native_processor::NativeProcessor,
     };
 
@@ -125,40 +139,115 @@ mod tests {
         }
     }
 
-    // TODO(danilan): Fix tests to use mocks and public interface
+    struct FakePrinter<T>
+    where
+        T: Display + Clone,
+    {
+        outputs: Vec<Output<T>>,
+        finished: bool,
+    }
+
+    impl<T> FakePrinter<T>
+    where
+        T: Display + Clone,
+    {
+        fn new() -> Self {
+            return FakePrinter {
+                outputs: Vec::new(),
+                finished: false,
+            };
+        }
+    }
+
+    impl<T> Printer<T> for FakePrinter<T>
+    where
+        T: Display + Clone,
+    {
+        fn feed(&mut self, output: Output<T>) {
+            self.outputs.push(output);
+        }
+
+        fn end(&mut self) {
+            self.finished = true;
+        }
+    }
+
     // TODO(danilan): Test entropy_processor
 
     #[test]
-    fn scan_buffer() {
+    fn scan_buffer_f64() {
         let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-
         let file = SourceFile::new("ok".into(), buf.as_slice());
 
         let mut scanner = Scanner::new(
             file,
             Box::new(NativeProcessor::<f64>::new(Endianness::Little)),
             Box::new(TrueFilter {}),
-            SimplePrinter::new(SimpleOutput::new()),
+            FakePrinter::<f64>::new(),
         );
 
-        let bytes_scanned = scanner.scan().expect("scan to complete successfuly");
+        let bytes_scanned = scanner.scan_file().expect("scan to complete successfuly");
         assert_eq!(bytes_scanned, 3);
+
+        let expected = vec![
+            Output::new(
+                Path::new("ok"),
+                f64::from_le_bytes(buf[..8].try_into().unwrap()),
+                "f64".into(),
+                DataContext::new(buf[..8].to_vec(), 0),
+            ),
+            Output::new(
+                Path::new("ok"),
+                f64::from_le_bytes(buf[1..9].try_into().unwrap()),
+                "f64".into(),
+                DataContext::new(buf[1..9].to_vec(), 1),
+            ),
+            Output::new(
+                Path::new("ok"),
+                f64::from_le_bytes(buf[2..10].try_into().unwrap()),
+                "f64".into(),
+                DataContext::new(buf[2..10].to_vec(), 2),
+            ),
+        ];
+        assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
     }
 
     #[test]
     fn scan_buffer_big() {
-        let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8];
-
+        let buf = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8];
         let file = SourceFile::new("ok".into(), buf.as_slice());
 
         let mut scanner = Scanner::new(
             file,
-            Box::new(NativeProcessor::<i64>::new(Endianness::Big)),
+            Box::new(NativeProcessor::<i32>::new(Endianness::Big)),
             Box::new(TrueFilter {}), // Empty filter
-            SimplePrinter::new(SimpleOutput::new()),
+            FakePrinter::<i32>::new(),
         );
 
-        let bytes_scanned = scanner.scan().expect("scan to complete successfuly");
+        let bytes_scanned = scanner.scan_file().expect("scan to complete successfuly");
         assert_eq!(bytes_scanned, 3);
+
+        let expected = vec![
+            Output::new(
+                Path::new("ok"),
+                i32::from_be_bytes(buf[..4].try_into().unwrap()),
+                "i32".into(),
+                DataContext::new(buf[..4].to_vec(), 0),
+            ),
+            Output::new(
+                Path::new("ok"),
+                i32::from_be_bytes(buf[1..5].try_into().unwrap()),
+                "i32".into(),
+                DataContext::new(buf[1..5].to_vec(), 1),
+            ),
+            Output::new(
+                Path::new("ok"),
+                i32::from_be_bytes(buf[2..6].try_into().unwrap()),
+                "i32".into(),
+                DataContext::new(buf[2..6].to_vec(), 2),
+            ),
+        ];
+
+        assert_that!(scanner.printer.outputs).contains_exactly_in_order(expected);
     }
 }
