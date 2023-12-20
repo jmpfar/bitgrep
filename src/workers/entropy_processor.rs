@@ -1,5 +1,7 @@
 use std::{cmp, collections::VecDeque, marker::PhantomData};
 
+use crate::utils::ringbuffer::RingBuffer;
+
 use super::processors::{ChunkSize, Processor};
 
 // Do not return entropy until scanned enough bytes
@@ -22,27 +24,12 @@ pub struct EntropyProcessor<T> {
     minimum_consumed_bytes: usize,
 
     // Stores values and probabilities of elements of the sliding window
-    buffer: VecDeque<u8>,
+    buffer: RingBuffer<u8>,
     phantom: PhantomData<T>, // TODO(danilan): Remove
 }
 
 impl<T> Processor<T> for EntropyProcessor<T> {
     fn consume(&mut self, bytes: &[u8]) -> Option<T> {
-        // Some of our buffer might exceed the window size, the part that exceeds will be handled differently.
-        let mut leftover_size = (self.buffer.len() + bytes.len()).saturating_sub(self.window_size);
-
-        // try to remove existing bytes to make space but don't exceed existing amount of elements.
-        let remove_from_existing: usize = cmp::min(leftover_size, self.buffer.len());
-
-        leftover_size -= self.remove_bytes(remove_from_existing);
-
-        // Handle case where bytes.len() > window_size
-        // In this case trim from the start of the slice
-        if leftover_size > 0 {
-            self.add_bytes(&bytes[leftover_size..]);
-            return None;
-        }
-
         self.add_bytes(bytes);
         return None;
     }
@@ -93,32 +80,24 @@ impl<T> EntropyProcessor<T> {
             window_size,
             minimum_consumed_bytes,
             histogram: [0u8; 256],
-            buffer: VecDeque::with_capacity(window_size),
+            buffer: RingBuffer::new(window_size),
             phantom: PhantomData,
         }
     }
 
-    /// Add bytes to queue and calculates entropy
-    /// Assumes sliding window already has space for the new items
+    /// Add bytes to queue and calculates histogram
     fn add_bytes(&mut self, bytes: &[u8]) {
         for byte in bytes {
             let value = *byte as usize;
             self.histogram[value] += 1;
-            self.buffer.push_front(*byte);
+            let removed = self.buffer.push_front(*byte);
+
+            if let Some(byte) = removed {
+                let value = byte as usize;
+                self.histogram[value] -= 1;
+            }
         }
         debug_assert!(self.buffer.len() <= self.window_size);
-    }
-
-    /// Removes n bytes from the entropy sliding window
-    /// Returns amount of bytes removed
-    fn remove_bytes(&mut self, count: usize) -> usize {
-        for _ in 0..count {
-            let byte = self.buffer.pop_back().unwrap();
-            let value = byte as usize;
-            self.histogram[value] -= 1;
-        }
-
-        return count;
     }
 }
 
