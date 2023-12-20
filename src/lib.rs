@@ -6,5 +6,5 @@ pub mod types;
 pub mod workers;
 
 mod filebuffer;
-
 mod hex;
+mod utils;
