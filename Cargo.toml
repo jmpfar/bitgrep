@@ -8,7 +8,7 @@ repository = "https://github.com/jmpfar/bitgrep"
 license = "Apache-2.0"
 readme = "README.md"
 keywords = ["binary", "grep", "forensics", "dfir", "cybersecurity"]
-categories = ["command-line-utilities", "development-tools::debugging"]
+categories = ["command-line-utilities", "development-tools::debugging", "encoding", "filesystem"]
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

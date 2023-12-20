@@ -153,6 +153,7 @@ Feel free to send pull requests, hopefully I'll get to these before 2026
     2. [ ] Add integration tests
     3. [ ] Create configuration => scanner builder
     4. [ ] Filters to enums
+    5. [ ] Add golden tests
 
 ### Rule engine
 
