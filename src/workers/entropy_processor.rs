@@ -15,7 +15,7 @@ const DEFAULT_MIN_CONSUMED_BYTES: usize = 512;
 /// the entire buffer is good enough.
 pub struct EntropyProcessor<T> {
     /// Counts of every byte occurences
-    histogram: [u8; 256],
+    histogram: [usize; 256],
 
     /// Window size used to calculate entropy
     window_size: usize,
@@ -56,7 +56,7 @@ impl<T> EntropyProducer for EntropyProcessor<T> {
                 continue;
             }
 
-            let p = f64::from(count) / (self.buffer.len() as f64);
+            let p = (count as f64) / (self.buffer.len() as f64);
             entropy -= p * p.log2();
         }
 
@@ -79,7 +79,7 @@ impl<T> EntropyProcessor<T> {
         EntropyProcessor {
             window_size,
             minimum_consumed_bytes,
-            histogram: [0u8; 256],
+            histogram: [0usize; 256],
             buffer: RingBuffer::new(window_size),
             phantom: PhantomData,
         }
